@@ -73,7 +73,6 @@
     .pagination-controls { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 16px; font-size: 13px; }
 
     /* 畫布與預覽區 */
-    .pdf-preview-box { background: #E5E5E5; border-radius: 4px; padding: 20px; text-align: center; margin-bottom: 12px; font-size: 13px; color: #444; border: 1px dashed #999; }
     .signature-pad-container { border: 1px solid #E5E5E5; border-radius: 4px; background-color: #FFFFFF; overflow: hidden; touch-action: none; position: relative; }
     #signature-pad { width: 100%; height: 200px; display: block; cursor: crosshair; }
 
@@ -83,15 +82,10 @@
     .modal-box-reject { border-top: 4px solid #EF4444; }
     .modal-box-history { border-top: 4px solid #111111; text-align: left; }
 
-    /* PDF A4 預覽 Modal (靠上對齊排版) */
-    .a4-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 1000; overflow-y: auto; padding: 40px 10px; align-items: flex-start; justify-content: center; }
-    .a4-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 210mm; margin: 0 auto; }
-    .a4-actions { position: sticky; top: 0; background: #FFF; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); width: 100%; display: flex; justify-content: space-between; align-items: center; z-index: 101; margin-bottom: 20px; border-left: 4px solid #111; }
-    .a4-container { background: #fff; width: 210mm; min-height: 297mm; padding: 20mm; box-shadow: 0 4px 15px rgba(0,0,0,0.3); position: relative; text-align: left; color: #000; line-height: 1.8; font-size: 15px; }
+    /* A4 預覽區塊 (直接顯示於底部) */
+    .a4-container-wrapper { overflow-x: auto; background: #E5E5E5; padding: 20px; border-radius: 8px; margin-top: 16px; }
+    .a4-container { background: #fff; width: 210mm; min-height: 297mm; padding: 20mm; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 0 auto; text-align: left; color: #000; line-height: 1.8; font-size: 15px; }
 
-    .review-list-item { background: #FFFFFF; border: 1px solid #E5E5E5; border-radius: 6px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-    .review-list-item:hover { background: #f1f3f5; }
-    
     .archive-header-row { display: flex; gap: 8px; margin-bottom: 16px; }
     .badge-success { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; font-size: 11px; padding: 2px 6px; border-radius: 12px; font-weight: 600; }
     .badge-failed { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; font-size: 11px; padding: 2px 6px; border-radius: 12px; font-weight: 600; }
@@ -108,59 +102,29 @@
 </head>
 <body>
 
-  <!-- A4 委任書預覽 Modal (靠上對齊排版) -->
-  <div id="a4-preview-modal" class="a4-modal-overlay">
-    <div class="a4-wrapper">
-      <div class="a4-actions">
-        <span style="font-size: 15px; font-weight: 700; color: #333;">📄 委任書預覽</span>
-        <div>
-          <button class="btn-secondary" onclick="closeA4Preview()" style="margin-right: 8px; color: #555;">取消修改</button>
-          <button class="btn-primary" id="btn-download-pdf" onclick="downloadA4PDF()">確認無誤，下載 PDF</button>
-        </div>
-      </div>
-      
-      <!-- 渲染 DOM，嚴格套用[cite: 1] 委任書格式 -->
-      <div id="a4-preview-content" class="a4-container">
-        <!-- 最上方放大居中顯示公司名稱 -->
-        <h1 id="tpl-top-company" style="text-align: center; font-size: 26px; margin-top: 0; margin-bottom: 20px;"></h1>
-        <h2 style="text-align: center; margin-bottom: 30px; font-size: 22px;">代理稅務申報委任書</h2>
-        
-        <p>茲委任 智嵂會計師事務所 為本公司代理稅務申報相關事宜，約定條款如下：</p>
-        <p>一、委任期間：<span id="tpl-period" style="font-weight:bold;"></span>，至以後解除委任關係時終止(雙方均得隨時解除委任)。</p>
-        
-        <div style="margin: 15px 0;">
-          <p style="margin:0;">二、委任範圍：</p>
-          <ul id="tpl-dynamic-items" style="margin-top: 5px; padding-left: 24px;"></ul>
-        </div>
-
-        <p>三、辦理程度：依據「所得稅法」、「加值型及非加值型營業稅法」及其他有關法令規定，就委任人所提供之憑證資料代為處理相關申報，以供稽徵機關查核。</p>
-        <p>四、酬&nbsp;&nbsp;&nbsp;&nbsp;金：詳見上方委任範圍所列。<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;任何調整記帳費用時，由雙方重新議定之。</p>
-        <p>五、其他約定事項：</p>
-        <div id="tpl-article5" style="padding-left: 24px; margin-top: 5px; margin-bottom: 30px;"></div>
-
-        <!-- 底部精準渲染簽署區 -->
-        <div style="margin-top: 40px;">
-          <p style="margin: 5px 0;">委&nbsp;&nbsp;任&nbsp;&nbsp;人：<span id="tpl-company" style="font-weight:bold;"></span></p>
-          <p style="margin: 5px 0;">代&nbsp;&nbsp;表&nbsp;&nbsp;人：<span id="tpl-rep" style="font-weight:bold;"></span></p>
-          <p style="margin: 5px 0;">地&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;址：<span id="tpl-address" style="font-weight:bold;"></span></p>
-          <br>
-          <p style="margin: 5px 0;">受&nbsp;&nbsp;任&nbsp;&nbsp;人：智嵂會計師事務所</p>
-          <p style="margin: 5px 0;">事務所地址：台中市西區忠明南路237號12樓之2</p>
-          <p style="margin: 5px 0;">電&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;話：<span id="tpl-phone" style="font-weight:bold;"></span></p>
-          
-          <p style="margin-top: 40px; font-weight:bold;"><span id="tpl-date"></span></p>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- AI 退件專屬 Modal -->
   <div id="ai-reject-modal" class="modal-overlay">
     <div class="modal-box modal-box-reject">
       <h3 style="color:#EF4444; margin-top:0; font-size:18px;">⚠️ 簽名品質未達標</h3>
       <p id="ai-reject-msg" style="font-size:14px; color:#444444; margin-bottom:20px; line-height:1.5;"></p>
       <button class="btn-primary" style="background-color:#EF4444; width:100%; height:42px; font-size:14px;" onclick="closeAiModal()">確認並重新簽名</button>
+    </div>
+  </div>
+
+  <!-- 電子簽名板專屬 Modal -->
+  <div id="signature-modal" class="modal-overlay">
+    <div class="modal-box">
+      <h3 style="margin-top:0; font-size:16px;">✍️ 請在下方空白處簽名</h3>
+      <div class="signature-pad-container" style="margin-bottom:16px;">
+        <canvas id="signature-pad"></canvas>
+      </div>
+      <div style="display:flex; justify-content:space-between;">
+        <button class="btn-secondary" onclick="clearSignature()">🗑️ 清空</button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-secondary" onclick="closeSignatureModal()">取消</button>
+          <button class="btn-primary" onclick="confirmSignature()">確認</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -208,7 +172,7 @@
         </div>
       </div>
 
-      <!-- 📄 代理稅務申報委任書建檔區塊 (含動態表單與草稿) -->
+      <!-- 📄 代理稅務申報委任書建檔區塊 -->
       <div class="card" id="commission-doc-section">
         <h3 style="margin-top: 0; font-size: 16px; font-weight: 700; margin-bottom: 12px;">📄 代理稅務申報委任書建檔</h3>
         <input type="hidden" id="comm-req-id">
@@ -233,7 +197,6 @@
         <div style="display: flex; gap: 8px;">
           <div class="form-group" style="flex: 1;">
             <label>電話</label>
-            <!-- 開頭 0 會被保留，寫入試算表時後端會套用純文字防禦 -->
             <input type="text" id="comm-phone" class="form-input" placeholder="例：0922562011">
           </div>
           <div class="form-group" style="flex: 1;">
@@ -245,6 +208,12 @@
         <div class="form-group">
           <label>簽署日期 (底部署押)</label>
           <input type="text" id="comm-date" class="form-input" placeholder="例：中華民國115年8月1日">
+        </div>
+
+        <!-- 新增酬金備註 -->
+        <div class="form-group" style="margin-top: 16px;">
+          <label>四、酬金備註 (可編輯，預設自動帶入)</label>
+          <textarea id="comm-fee-remark" class="form-input" rows="2">任何調整記帳費用時，由雙方重新議定之。</textarea>
         </div>
 
         <div class="form-group" style="margin-top: 16px;">
@@ -272,55 +241,14 @@
 
         <div style="display: flex; gap: 10px; margin-top: 20px;">
           <button class="btn-secondary" style="flex:1; height: 48px; font-size: 14px; font-weight:bold;" id="btn-save-draft" onclick="handleSaveDraft()">💾 儲存草稿</button>
-          <button class="btn-primary" style="flex:2; height: 48px; font-size: 14px; background-color: #2563eb;" id="btn-preview-comm" onclick="openA4PreviewModal()">🔍 預覽 A4 委任書</button>
+          <button class="btn-primary" style="flex:2; height: 48px; font-size: 14px; background-color: #2563eb;" id="btn-preview-comm" onclick="updateA4Preview()">🔍 產出與更新預覽畫面</button>
         </div>
       </div>
 
-      <!-- 舊版 Tab 2 的簽署與覆核卡片，整併至 01 區 -->
+      <!-- 現場線上簽署區 -->
       <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <h3 style="margin: 0; font-size: 16px;">⚖️ 行政印鑑覆核與用印區</h3>
-          <button class="btn-secondary" onclick="loadPendingReviews()" style="height: 30px; font-size: 12px;">重新整理</button>
-        </div>
+        <h3 style="margin-top: 0;">✍️ 現場線上簽署區</h3>
         
-        <div id="pending-review-list" style="margin-top: 16px;">
-          <div style="text-align: center; color: #888; font-size: 13px;">資料載入中...</div>
-        </div>
-        
-        <div id="review-detail-box" style="display: none; margin-top: 20px; border-top: 1px solid #E5E5E5; padding-top: 16px;">
-          <h4 style="margin-top: 0;">🔍 案件覆核對比</h4>
-          <input type="hidden" id="review-quote-id">
-          <input type="hidden" id="review-sign-id">
-          
-          <div style="display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;">
-            <div style="flex: 1; min-width: 200px; background: #FFF; padding: 12px; border: 1px solid #E5E5E5; border-radius: 4px;">
-              <div style="font-size: 12px; color: #888;">原始系統紀錄</div>
-              <div id="review-original-info" style="font-size: 14px; margin-top: 8px; line-height: 1.5;"></div>
-            </div>
-            <div style="flex: 1; min-width: 200px; background: #FFF; padding: 12px; border: 1px solid #E5E5E5; border-radius: 4px;">
-              <div style="font-size: 12px; color: #888;">客戶初簽合約 PDF</div>
-              <div style="margin-top: 8px;">
-                <a id="review-pdf-link" href="#" target="_blank" style="color: #111111; font-size: 14px; font-weight: 600; text-decoration: underline;">📄 點擊開啟初簽 PDF</a>
-                <div id="review-ai-score" style="font-size: 13px; color: #28a745; margin-top: 8px; font-weight: 600;"></div>
-              </div>
-            </div>
-          </div>
-
-          <div style="display: flex; justify-content: space-between; gap: 12px;">
-            <button class="btn-secondary btn-reject" style="flex: 1; color: #EF4444; border-color: #EF4444;" onclick="rejectReview()">退回修正</button>
-            <button class="btn-primary" style="flex: 2;" id="btn-approve-stamp" onclick="approveAndStamp()">核准用印 (AI 驗證與套印)</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3 style="margin-top: 0;">📄 待簽署單據預覽 (現場線上簽名)</h3>
-        <div class="pdf-preview-box" id="pdf-preview-box">
-           <p style="margin-bottom: 8px;">簽署資訊帶入區 (發送連結時帶入)</p>
-           <input type="text" id="sign-quote-id" class="form-input" placeholder="請填寫單號 (例如 REQ-20240101)">
-        </div>
-        
-        <h3 style="margin-top: 20px;">✍️ 客戶電子簽章區</h3>
         <div class="form-group">
           <label>客戶正楷姓名</label>
           <input type="text" id="sign-client-name" class="form-input" placeholder="請輸入姓名與同意意願">
@@ -338,20 +266,62 @@
         </div>
         
         <div class="form-group" style="margin-top: 16px;">
-          <label style="display:flex; justify-content:space-between;">
-            <span>請在下方空白處簽名 (支援觸控)</span>
-            <span style="color:#888; font-size: 11px;">進度自動存檔</span>
-          </label>
-          <div class="signature-pad-container">
-            <canvas id="signature-pad"></canvas>
+          <button class="btn-secondary" style="width:100%; height:42px; border:2px dashed #111;" onclick="openSignatureModal()">✍️ 點擊開啟簽名板</button>
+          
+          <div id="signature-preview-container" style="display:none; margin-top:12px; text-align:center;">
+            <p style="font-size:12px; color:#888; text-align:left; margin-bottom:4px;">簽名預覽：</p>
+            <img id="signature-preview-img" src="" style="max-height:100px; border:1px solid #E5E5E5; border-radius:4px; padding:4px;">
           </div>
         </div>
         
-        <div style="display:flex; justify-content:space-between; margin-top: 16px;">
-          <button class="btn-secondary" onclick="clearSignature()">🗑️ 清除重簽</button>
-          <button class="btn-primary" id="btn-submit-sign" onclick="submitSignature()">✅ 確認同意並回簽</button>
+        <div style="margin-top: 16px;">
+          <button class="btn-primary" style="width:100%;" id="btn-submit-sign" onclick="submitSignature()">✅ 確認同意並送出簽署</button>
         </div>
       </div>
+
+      <!-- PDF A4 預覽區塊 (直接在下方顯示) -->
+      <div class="card" id="a4-inline-preview-card" style="display:none; padding:0; overflow:hidden;">
+        <div style="background:#111; color:#fff; padding:12px 16px; display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="margin:0; font-size:15px;">📄 委任書 A4 預覽與下載</h3>
+          <button class="btn-primary" style="background:#28a745;" id="btn-download-pdf" onclick="downloadA4PDF()">📥 確認無誤，下載 PDF</button>
+        </div>
+        
+        <div class="a4-container-wrapper">
+          <div id="a4-preview-content" class="a4-container">
+            <!-- 最上方放大居中顯示公司名稱 -->
+            <h1 id="tpl-top-company" style="text-align: center; font-size: 26px; margin-top: 0; margin-bottom: 20px;"></h1>
+            <h2 style="text-align: center; margin-bottom: 30px; font-size: 22px;">代理稅務申報委任書</h2>
+            
+            <p>茲委任 智嵂會計師事務所 為本公司代理稅務申報相關事宜，約定條款如下：</p>
+            <p>一、委任期間：<span id="tpl-period" style="font-weight:bold;"></span>，至以後解除委任關係時終止(雙方均得隨時解除委任)。</p>
+            
+            <div style="margin: 15px 0;">
+              <p style="margin:0;">二、委任範圍：</p>
+              <ul id="tpl-dynamic-items" style="margin-top: 5px; padding-left: 24px;"></ul>
+            </div>
+
+            <p>三、辦理程度：依據「所得稅法」、「加值型及非加值型營業稅法」及其他有關法令規定，就委任人所提供之憑證資料代為處理相關申報，以供稽徵機關查核。</p>
+            <p>四、酬&nbsp;&nbsp;&nbsp;&nbsp;金：詳見上方委任範圍所列。<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="tpl-fee-remark"></span></p>
+            <p>五、其他約定事項：</p>
+            <div id="tpl-article5" style="padding-left: 24px; margin-top: 5px; margin-bottom: 30px;"></div>
+
+            <!-- 底部精準渲染簽署區 -->
+            <div style="margin-top: 40px;">
+              <p style="margin: 5px 0;">委&nbsp;&nbsp;任&nbsp;&nbsp;人：<span id="tpl-company" style="font-weight:bold;"></span></p>
+              <p style="margin: 5px 0;">代&nbsp;&nbsp;表&nbsp;&nbsp;人：<span id="tpl-rep" style="font-weight:bold;"></span></p>
+              <p style="margin: 5px 0;">地&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;址：<span id="tpl-address" style="font-weight:bold;"></span></p>
+              <br>
+              <p style="margin: 5px 0;">受&nbsp;&nbsp;任&nbsp;&nbsp;人：智嵂會計師事務所</p>
+              <p style="margin: 5px 0;">事務所地址：台中市西區忠明南路237號12樓之2</p>
+              <p style="margin: 5px 0;">電&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;話：<span id="tpl-phone" style="font-weight:bold;"></span></p>
+              
+              <p style="margin-top: 40px; font-weight:bold;"><span id="tpl-date"></span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- ==================== 02 歸檔與追蹤 ==================== -->
@@ -410,10 +380,7 @@
       document.querySelector(`.tab-item[data-target="${tabId}"]`).classList.add('active');
       document.getElementById(tabId).classList.add('active');
 
-      if(tabId === 'tab1') {
-        setTimeout(resizeCanvas, 100);
-        loadPendingReviews(); 
-      } else if (tabId === 'tab2') {
+      if (tabId === 'tab2') {
         loadRequirements();
         loadArchives();
       }
@@ -443,7 +410,6 @@
     }
     function closeAiModal() {
       document.getElementById('ai-reject-modal').style.display = 'none';
-      clearSignature(); 
     }
 
     async function openHistoryModal(quoteId) {
@@ -476,7 +442,6 @@
             google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).processBackendRouting(requestData); 
           });
         } else {
-          // 修復 CORS Preflight 攔截：強制使用 text/plain 發送
           const response = await fetch(GAS_WEB_URL, {
             method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(requestData)
           });
@@ -519,7 +484,7 @@
     }
 
     // ----------------------------------------------------
-    // A4 預覽 Modal, 草稿儲存與 PDF 純前端下載
+    // 預覽更新, 草稿儲存與 PDF 純前端下載
     // ----------------------------------------------------
     function getCommFormData() {
       const items = [];
@@ -541,6 +506,7 @@
         date: document.getElementById('comm-date').value.trim(),
         phone: document.getElementById('comm-phone').value.trim(),
         article5: document.getElementById('comm-article5').value.trim(),
+        feeRemark: document.getElementById('comm-fee-remark').value.trim(), // 第 45 欄
         items: items
       };
     }
@@ -557,7 +523,6 @@
         document.getElementById('comm-row-id').value = res._rowId;
         document.getElementById('comm-req-id').value = res.reqId;
         alert("✅ 草稿儲存成功！(狀態已更新為「建檔中」)");
-        if (document.querySelector('.tab-item[data-target="tab2"]').classList.contains('active')) loadRequirements();
       } catch(err) {
         alert("儲存草稿失敗：" + err.message);
       } finally {
@@ -565,7 +530,7 @@
       }
     }
 
-    function openA4PreviewModal() {
+    function updateA4Preview() {
       const data = getCommFormData();
       if (!data.companyName || !data.rep || !data.address || !data.period || !data.date || !data.phone || data.items.length === 0) {
         return alert("預覽前請先填寫所有委任書基本欄位，並至少新增一組委任項目！");
@@ -582,8 +547,9 @@
       document.getElementById('tpl-address').textContent = data.address;
       document.getElementById('tpl-phone').textContent = data.phone;
       document.getElementById('tpl-date').textContent = data.date;
-
-      // 處理條款五的多行換行
+      
+      // 處理條款多行換行
+      document.getElementById('tpl-fee-remark').innerHTML = escapeHtml(data.feeRemark).replace(/\n/g, '<br>');
       document.getElementById('tpl-article5').innerHTML = escapeHtml(data.article5).replace(/\n/g, '<br>');
 
       // 動態渲染列點項目
@@ -595,12 +561,10 @@
         }
       });
 
-      // 顯示 Modal
-      document.getElementById('a4-preview-modal').style.display = 'flex';
-    }
-
-    function closeA4Preview() {
-      document.getElementById('a4-preview-modal').style.display = 'none';
+      // 顯示並捲動至底部 Inline 預覽區塊
+      const previewCard = document.getElementById('a4-inline-preview-card');
+      previewCard.style.display = 'block';
+      previewCard.scrollIntoView({ behavior: 'smooth' });
     }
 
     async function downloadA4PDF() {
@@ -609,7 +573,7 @@
       btn.disabled = true; btn.textContent = "PDF 產生中...";
 
       try {
-        // 背景儲存草稿 (同步最新資訊至後端 44 欄)
+        // 背景儲存草稿 (同步最新資訊至後端 45 欄)
         const res = await apiCall('saveDraft', data);
         document.getElementById('comm-row-id').value = res._rowId;
         document.getElementById('comm-req-id').value = res.reqId;
@@ -617,20 +581,19 @@
         // 呼叫 html2pdf 進行純前端下載
         const element = document.getElementById('a4-preview-content');
         const opt = {
-          margin:       15,
+          margin:       0, // 設為 0 以繼承 .a4-container 的 20mm padding
           filename:     `代理帳務委任書-${data.companyName}.pdf`,
-          image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  { scale: 2, useCORS: true },
+          image:        { type: 'jpeg', quality: 1 },
+          html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
           jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
         await html2pdf().set(opt).from(element).save();
-        alert("✅ 委任書 PDF 已成功下載！請將檔案提供給客戶確認。");
-        closeA4Preview();
+        alert("✅ 委任書 PDF 已成功下載！");
       } catch (err) {
         alert(`產生失敗：${err.message}`);
       } finally {
-        btn.disabled = false; btn.textContent = "確認無誤，下載 PDF";
+        btn.disabled = false; btn.textContent = "📥 確認無誤，下載 PDF";
       }
     }
 
@@ -723,9 +686,8 @@
       document.getElementById('comm-phone').value = item.phone || '';
       document.getElementById('comm-date').value = item.date || '';
       
-      if(item.article5) {
-        document.getElementById('comm-article5').value = item.article5;
-      }
+      if(item.article5) document.getElementById('comm-article5').value = item.article5;
+      if(item.feeRemark) document.getElementById('comm-fee-remark').value = item.feeRemark;
 
       // 3. 重建動態項目
       clearCommDynamicItems();
@@ -734,6 +696,9 @@
       } else {
         addCommDynamicItem();
       }
+      
+      // 隱藏舊的預覽
+      document.getElementById('a4-inline-preview-card').style.display = 'none';
     }
 
     async function uploadSignedContract(rowId, reqId) {
@@ -774,9 +739,20 @@
     }
 
     // ----------------------------------------------------
-    // 電子簽名 Canvas 邏輯 (留存於 01 區)
+    // 電子簽名板與 Canvas 邏輯
     // ----------------------------------------------------
     let canvas, ctx, isDrawing = false;
+    function openSignatureModal() {
+      document.getElementById('signature-modal').style.display = 'flex';
+      setTimeout(() => {
+        if (!canvas) initCanvas();
+        resizeCanvas();
+      }, 100);
+    }
+    function closeSignatureModal() {
+      document.getElementById('signature-modal').style.display = 'none';
+    }
+
     function initCanvas() {
       canvas = document.getElementById('signature-pad');
       if (!canvas) return;
@@ -784,13 +760,11 @@
       window.addEventListener('resize', resizeCanvas);
       canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mousemove', draw); canvas.addEventListener('mouseup', stopDrawing); canvas.addEventListener('mouseout', stopDrawing);
       canvas.addEventListener('touchstart', startDrawing, {passive: false}); canvas.addEventListener('touchmove', draw, {passive: false}); canvas.addEventListener('touchend', stopDrawing, {passive: false});
-      setTimeout(resizeCanvas, 500);
     }
     function resizeCanvas() {
       if(!canvas || canvas.offsetWidth === 0) return;
       const rect = canvas.parentElement.getBoundingClientRect();
       canvas.width = rect.width; canvas.height = 200; ctx.lineWidth = 3; ctx.lineCap = "round"; ctx.strokeStyle = "#111111";
-      restoreSignatureFromLocal();
     }
     function getPointerPos(e) {
       const rect = canvas.getBoundingClientRect(); let clientX = e.clientX; let clientY = e.clientY;
@@ -799,12 +773,17 @@
     }
     function startDrawing(e) { e.preventDefault(); isDrawing = true; const pos = getPointerPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
     function draw(e) { if (!isDrawing) return; e.preventDefault(); const pos = getPointerPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); }
-    function stopDrawing(e) { if (!isDrawing) return; e.preventDefault(); isDrawing = false; saveSignatureToLocal(); }
-    function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); localStorage.removeItem('client_signature_draft'); }
-    function saveSignatureToLocal() { if(canvas) localStorage.setItem('client_signature_draft', canvas.toDataURL()); }
-    function restoreSignatureFromLocal() {
-      const dataURL = localStorage.getItem('client_signature_draft');
-      if (dataURL && ctx) { let img = new Image(); img.onload = function() { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.drawImage(img, 0, 0); }; img.src = dataURL; }
+    function stopDrawing(e) { if (!isDrawing) return; e.preventDefault(); isDrawing = false; }
+    function clearSignature() { if(ctx) ctx.clearRect(0, 0, canvas.width, canvas.height); }
+    
+    function confirmSignature() {
+      const blankCanvas = document.createElement('canvas'); 
+      blankCanvas.width = canvas.width; blankCanvas.height = canvas.height;
+      if (canvas.toDataURL() === blankCanvas.toDataURL()) return alert("請在畫布上簽名！");
+
+      document.getElementById('signature-preview-img').src = canvas.toDataURL();
+      document.getElementById('signature-preview-container').style.display = 'block';
+      closeSignatureModal();
     }
 
     function sendVerifyCode() {
@@ -814,85 +793,31 @@
     }
 
     async function submitSignature() {
-      const quoteId = document.getElementById('sign-quote-id').value.trim();
+      const quoteId = document.getElementById('comm-req-id').value.trim(); // 綁定草稿的單號
       const clientName = document.getElementById('sign-client-name').value.trim();
       const companyName = document.getElementById('sign-company-name').value.trim() || clientName;
       const phone = document.getElementById('sign-phone').value.trim();
-      if(!quoteId) return alert("請帶入或填寫單號");
-      if(!clientName || !phone) return alert("請填寫姓名與手機號碼");
+      const previewImg = document.getElementById('signature-preview-img');
       
-      const blankCanvas = document.createElement('canvas'); blankCanvas.width = canvas.width; blankCanvas.height = canvas.height;
-      if (canvas.toDataURL() === blankCanvas.toDataURL()) return alert("請在畫布上簽名！");
+      if(!quoteId) return alert("請先在上方『儲存草稿』產生單號後，再進行簽署！");
+      if(!clientName || !phone) return alert("請填寫姓名與手機號碼");
+      if(!previewImg.src || previewImg.src.indexOf('data:image') === -1) return alert("請先點擊電子簽名按鈕完成簽章！");
 
-      const signatureBase64 = canvas.toDataURL(); 
+      const signatureBase64 = previewImg.src; 
       const btn = document.getElementById('btn-submit-sign');
-      btn.disabled = true; btn.textContent = "AI 防偽鑑識中...";
+      btn.disabled = true; btn.textContent = "AI 防偽鑑識與存檔中...";
 
       try {
         const payload = { quoteId, clientName, companyName, phone, signatureBase64 };
         await apiCall('saveClientSignature', payload);
-        alert(`✅ 簽署完成！\n初簽 PDF 已歸檔至待覆核資料夾。`);
-        clearSignature(); loadPendingReviews();
+        alert(`✅ 簽署完成！\n簽署紀錄已存檔。`);
+        previewImg.src = "";
+        document.getElementById('signature-preview-container').style.display = 'none';
+        clearSignature(); 
       } catch(err) {
         if (err.message.includes('AI防偽檢驗未通過')) showAiModal(err.message);
         else alert("簽署提交失敗：" + err.message);
-      } finally { btn.disabled = false; btn.textContent = "✅ 確認同意並回簽"; }
-    }
-
-    // ----------------------------------------------------
-    // 行政覆核與用印邏輯
-    // ----------------------------------------------------
-    let currentReviewItem = null;
-
-    async function loadPendingReviews() {
-      const listEl = document.getElementById('pending-review-list');
-      listEl.innerHTML = '<div style="text-align: center; color: #888; font-size: 13px;">資料載入中...</div>';
-      try {
-        const reviews = await apiCall('getPendingReviews', {});
-        if (!reviews || reviews.length === 0) {
-          listEl.innerHTML = '<div style="text-align: center; color: #888; font-size: 13px;">目前無待覆核案件。</div>';
-          document.getElementById('review-detail-box').style.display = 'none'; return;
-        }
-
-        let html = '';
-        reviews.forEach(item => {
-          html += `<div class="review-list-item" onclick='openReviewDetail(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
-              <div><div style="font-weight:600; font-size:14px;">${escapeHtml(item.clientName)} - ${escapeHtml(item.quoteId)}</div><div style="font-size:12px; color:#888; margin-top:4px;">簽署時間：${escapeHtml(item.signTime)}</div></div>
-              <div style="text-align: right;"><div style="font-size:11px; color:#111; background:#F8F9FA; padding:2px 6px; border-radius:4px; border:1px solid #E5E5E5;">${escapeHtml(item.aiResult)}</div></div>
-            </div>`;
-        });
-        listEl.innerHTML = html;
-      } catch (err) { listEl.innerHTML = `<div style="text-align: center; color: #EF4444; font-size: 13px;">載入失敗: ${err.message}</div>`; }
-    }
-
-    function openReviewDetail(item) {
-      currentReviewItem = item;
-      document.getElementById('review-detail-box').style.display = 'block';
-      document.getElementById('review-quote-id').value = item.quoteId; document.getElementById('review-sign-id').value = item.signId;
-      document.getElementById('review-original-info').innerHTML = `<strong>案件單號:</strong> ${escapeHtml(item.quoteId)}<br><strong>客戶姓名:</strong> ${escapeHtml(item.clientName)}<br><strong>公司名稱:</strong> ${escapeHtml(item.companyName)}<br>`;
-      document.getElementById('review-pdf-link').href = item.contractPdfUrl; document.getElementById('review-ai-score').innerText = `✅ 系統初檢：${item.aiResult}`;
-      document.getElementById('review-detail-box').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function rejectReview() {
-      if (!currentReviewItem) return;
-      const reason = prompt("請輸入退件原因：");
-      if (reason === null) return; 
-      alert(`已退回案件：${currentReviewItem.quoteId}\n原因：${reason || '未填寫'}`); document.getElementById('review-detail-box').style.display = 'none';
-    }
-
-    async function approveAndStamp() {
-      if (!currentReviewItem) return;
-      const btn = document.getElementById('btn-approve-stamp');
-      btn.disabled = true; btn.textContent = "AI 比對歸檔中...";
-
-      try {
-        const payload = { signId: currentReviewItem.signId, quoteId: currentReviewItem.quoteId, clientName: currentReviewItem.clientName, companyName: currentReviewItem.companyName, contractPdfUrl: currentReviewItem.contractPdfUrl };
-        await apiCall('approveAndStampContract', payload);
-        alert(`✅ 用印完成並已觸發雲端自動歸檔！\n資料夾與合約已成功建立。`);
-        document.getElementById('review-detail-box').style.display = 'none';
-        loadPendingReviews(); 
-      } catch (err) { alert("核准用印失敗：" + err.message); } finally { btn.disabled = false; btn.textContent = "核准用印 (AI 驗證與套印)"; }
+      } finally { btn.disabled = false; btn.textContent = "✅ 確認同意並送出簽署"; }
     }
 
     // ----------------------------------------------------
@@ -978,7 +903,6 @@
     window.addEventListener('DOMContentLoaded', () => {
       updateNetworkStatus();
       addCommDynamicItem();
-      initCanvas();
     });
   </script>
 </body>
