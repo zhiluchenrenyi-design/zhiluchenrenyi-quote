@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    <!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Easy V.C. Quote & Sign</title>
+  <style>
+    /* 全局樣式設定 */
+    * {
+      box-sizing: border-box;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Microsoft JhengHei', sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #FFFFFF;
+      color: #111111;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    /* 頂部導覽列 */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid #E5E5E5;
+      position: sticky;
+      top: 0;
+      background-color: #FFFFFF;
+      z-index: 100;
+    }
+    nav h1 {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: 0.5px;
+    }
+    .network-indicator {
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .status-online { background-color: #28a745; }
+    .status-offline { background-color: #dc3545; }
+
+    /* 三大頁籤選單 (Tab Bar) */
+    .tab-bar {
+      display: flex;
+      border-bottom: 1px solid #E5E5E5;
+      background-color: #FFFFFF;
+    }
+    .tab-item {
+      flex: 1;
+      text-align: center;
+      padding: 12px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #888888;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-bottom: 2px solid transparent;
+    }
+    .tab-item.active {
+      color: #111111;
+      border-bottom: 2px solid #111111;
+    }
+
+    /* 內容區塊 */
+    .container {
+      padding: 16px;
+    }
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* 卡片設計規範 */
+    .card {
+      background-color: #F8F9FA;
+      border: 1px solid #E5E5E5;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    /* 按鈕樣式 */
+    .btn-primary {
+      background-color: #111111;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 4px;
+      padding: 0 16px;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+      height: 36px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-primary:disabled { background-color: #888888; cursor: not-allowed; }
+    
+    .btn-secondary {
+      background-color: #FFFFFF;
+      color: #111111;
+      border: 1px solid #E5E5E5;
+      border-radius: 4px;
+      padding: 4px 10px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s ease;
+    }
+    .btn-reject:hover { background-color: #fef2f2; }
+
+    /* 表單元件 */
+    .form-group { margin-bottom: 12px; }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #444444;
+      margin-bottom: 4px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #E5E5E5;
+      border-radius: 4px;
+      font-size: 14px;
+      background-color: #FFFFFF;
+    }
+    
+    /* 標籤與時間軸 */
+    .tag-item {
+      background-color: #111111;
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-right: 6px;
+      margin-bottom: 4px;
+    }
+    .tag-dynamic {
+      background-color: #e2e8f0;
+      color: #0f172a;
+      border: 1px solid #cbd5e1;
+    }
+    
+    .timeline-container { position: relative; padding-left: 18px; border-left: 2px solid #E5E5E5; margin-top: 12px; }
+    .timeline-item { position: relative; margin-bottom: 20px; }
+    .timeline-dot { position: absolute; left: -24px; top: 14px; width: 10px; height: 10px; border-radius: 50%; background-color: #111111; border: 2px solid #FFFFFF; }
+    .timeline-card { background: #FFFFFF; border: 1px solid #E5E5E5; border-radius: 6px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .timeline-title { font-size: 15px; font-weight: 700; color: #111111; }
+    .timeline-company { font-size: 13px; color: #666666; }
+    .timeline-time { font-size: 11px; color: #999999; }
+    .timeline-body { font-size: 13px; color: #444444; background-color: #F8F9FA; padding: 8px 10px; border-radius: 4px; border: 1px dashed #E5E5E5; word-break: break-word; }
+    .timeline-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; flex-wrap: wrap; gap: 8px; }
+    
+    .btn-import-draft {
+      height: 36px; font-size: 13px; font-weight: 600; background-color: #111111; color: #FFFFFF;
+      border: none; border-radius: 4px; padding: 0 14px; cursor: pointer; transition: background-color 0.2s;
+    }
+
+    /* 動態服務項目列表 */
+    .service-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+    .service-row input[type="text"] { flex: 2; }
+    .service-row input[type="number"] { flex: 1; }
+    .btn-remove-row { background: none; border: none; color: #dc3545; font-size: 16px; font-weight: bold; cursor: pointer; padding: 0 4px; }
+    
+    /* 金額結算區塊 */
+    .summary-box { background-color: #FFFFFF; border: 1px solid #E5E5E5; border-radius: 6px; padding: 12px; margin-top: 16px; font-size: 14px; }
+    .summary-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .summary-row:last-child { margin-bottom: 0; padding-top: 8px; border-top: 1px dashed #E5E5E5; font-weight: 700; font-size: 16px; }
+    .summary-input { width: 100px; text-align: right; padding: 4px 8px; border: 1px solid #E5E5E5; border-radius: 4px; }
+
+    /* 終極生成按鈕 */
+    .btn-generate-pdf {
+      width: 100%; height: 48px; background-color: #111111; color: #FFFFFF; font-size: 15px;
+      font-weight: 700; border: none; border-radius: 6px; margin-top: 16px; cursor: pointer;
+    }
+    .btn-generate-pdf:disabled { background-color: #888888; cursor: not-allowed; }
+
+    /* 畫布與預覽區 */
+    .pdf-preview-box {
+      background: #E5E5E5; border-radius: 4px; padding: 20px; text-align: center;
+      margin-bottom: 12px; font-size: 13px; color: #444; border: 1px dashed #999;
+    }
+    .signature-pad-container {
+      border: 1px solid #E5E5E5; border-radius: 4px; background-color: #FFFFFF;
+      overflow: hidden; touch-action: none; position: relative;
+    }
+    #signature-pad { width: 100%; height: 200px; display: block; cursor: crosshair; }
+
+    /* AI 退件警告與歷史彈窗 Modal */
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center;
+    }
+    .modal-box {
+      background: #FFFFFF; padding: 24px; border-radius: 8px; width: 90%; max-width: 400px;
+      max-height: 85vh; overflow-y: auto; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .modal-box-reject { border-top: 4px solid #EF4444; }
+    .modal-box-history { border-top: 4px solid #111111; text-align: left; }
+
+    /* 覆核清單與歸檔樣式 */
+    .review-list-item {
+      background: #FFFFFF; border: 1px solid #E5E5E5; border-radius: 6px; padding: 12px;
+      margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+    }
+    .review-list-item:hover { background: #f1f3f5; }
+    
+    .archive-header-row { display: flex; gap: 8px; margin-bottom: 16px; }
+    .badge-success { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; font-size: 11px; padding: 2px 6px; border-radius: 12px; font-weight: 600; }
+    .badge-failed { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; font-size: 11px; padding: 2px 6px; border-radius: 12px; font-weight: 600; }
+
+    /* 歷史追蹤時間軸小元件 */
+    .history-log-item {
+      padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px;
+    }
+    .history-log-item:last-child { border-bottom: none; }
+    .history-time { font-size: 11px; color: #64748b; }
+    .history-module { font-weight: 600; color: #0f172a; margin-right: 4px; }
+    .history-action { color: #334155; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <!-- AI 退件專屬 Modal -->
+  <div id="ai-reject-modal" class="modal-overlay">
+    <div class="modal-box modal-box-reject">
+      <h3 style="color:#EF4444; margin-top:0; font-size:18px;">⚠️ 簽名品質未達標</h3>
+      <p id="ai-reject-msg" style="font-size:14px; color:#444444; margin-bottom:20px; line-height:1.5;"></p>
+      <button class="btn-primary" style="background-color:#EF4444; width:100%; height:42px; font-size:14px;" onclick="closeAiModal()">確認並重新簽名</button>
+    </div>
+  </div>
+
+  <!-- 階段十：完整歷程 Log 彈窗 -->
+  <div id="history-modal" class="modal-overlay">
+    <div class="modal-box modal-box-history">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+        <h3 style="margin:0; font-size:16px;">📜 完整生命週期歷程</h3>
+        <button style="background:none; border:none; font-size:18px; cursor:pointer;" onclick="closeHistoryModal()">×</button>
+      </div>
+      <div id="history-log-container" style="background:#F8F9FA; padding:12px; border-radius:6px; border:1px solid #E5E5E5;">
+        <div style="text-align: center; color: #888; font-size: 13px;">載入中...</div>
+      </div>
+    </div>
+  </div>
+
+  <nav>
+    <h1>Easy V.C. Quote & Sign</h1>
+    <div class="network-indicator" id="network-indicator">
+      <div class="status-dot status-online" id="network-dot"></div>
+      <span id="network-text">Online</span>
+    </div>
+  </nav>
+
+  <div class="tab-bar">
+    <div class="tab-item active" data-target="tab1" onclick="switchTab('tab1')">01_需求與報價</div>
+    <div class="tab-item" data-target="tab2" onclick="switchTab('tab2')">02_簽署與覆核</div>
+    <div class="tab-item" data-target="tab3" onclick="switchTab('tab3')">03_歸檔與追蹤</div>
+  </div>
+
+  <div class="container">
+    
+    <!-- ==================== 01 需求與報價 ==================== -->
+    <div id="tab1" class="tab-content active">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <h3 style="margin: 0; font-size: 15px; font-weight: 700;">📲 模擬接收 LINE 對話 (Gemini AI 提煉)</h3>
+          <button class="btn-secondary" onclick="toggleSimulateBox()" style="font-size: 12px;">折疊/展開</button>
+        </div>
+        <div id="simulate-box" style="display: none;">
+          <textarea id="line-input" rows="3" class="form-input" placeholder="貼上 LINE 對話訊息範例..."></textarea>
+          <div style="text-align: right; margin-top: 8px;">
+            <button class="btn-primary" id="btn-sim-send" onclick="handleSimulateLineMsg()">模擬 Webhook 接收</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="margin: 0; font-size: 16px; font-weight: 700;">需求時間軸 (Timeline)</h3>
+          <button class="btn-secondary" onclick="loadRequirements()" style="height: 30px; font-size: 12px;">重新整理</button>
+        </div>
+        <div class="timeline-container" id="timeline-list">
+          <div style="text-align: center; color: #888; padding: 20px; font-size: 13px;">資料載入中...</div>
+        </div>
+      </div>
+
+      <div class="card" id="quote-draft-section">
+        <h3 style="margin-top: 0; font-size: 16px; font-weight: 700; margin-bottom: 12px;">📝 行動報價單快速生成區</h3>
+        <input type="hidden" id="draft-req-id">
+        <div class="form-group">
+          <label>客戶姓名</label>
+          <input type="text" id="draft-customer-name" class="form-input" placeholder="客戶姓名">
+        </div>
+        <div class="form-group">
+          <label>公司名稱</label>
+          <input type="text" id="draft-company-name" class="form-input" placeholder="公司名稱">
+        </div>
+        
+        <div class="form-group" style="margin-top: 16px;">
+          <label style="display:flex; justify-content:space-between; align-items:center;">
+            <span>報價服務項目</span>
+            <button class="btn-secondary" style="font-size: 11px; padding: 2px 6px;" onclick="addServiceRow('', 0)">+ 新增項目</button>
+          </label>
+          <div id="dynamic-services-container"></div>
+        </div>
+
+        <div class="summary-box">
+          <div class="summary-row"><span>原價合計 (NT$)</span><span id="calc-original">0</span></div>
+          <div class="summary-row">
+            <span>折扣金額 (NT$)</span>
+            <input type="number" id="calc-discount" class="summary-input" value="0" min="0" oninput="calculateTotal()">
+          </div>
+          <div class="summary-row"><span>最終報價 (NT$)</span><span id="calc-final" style="color:#d93025;">0</span></div>
+        </div>
+        <button class="btn-generate-pdf" id="btn-generate-pdf" onclick="handleGenerateQuotePDF()">產生 PDF 報價單並發送</button>
+        <div id="draft-status" style="font-size: 12px; color: #888888; text-align:center; margin-top:10px;">表單異動已自動同步至 LocalStorage</div>
+      </div>
+    </div>
+
+    <!-- ==================== 02 簽署與覆核 ==================== -->
+    <div id="tab2" class="tab-content">
+      
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="margin: 0; font-size: 16px;">⚖️ 行政印鑑覆核與用印區</h3>
+          <button class="btn-secondary" onclick="loadPendingReviews()" style="height: 30px; font-size: 12px;">重新整理</button>
+        </div>
+        
+        <div id="pending-review-list" style="margin-top: 16px;">
+          <div style="text-align: center; color: #888; font-size: 13px;">資料載入中...</div>
+        </div>
+        
+        <div id="review-detail-box" style="display: none; margin-top: 20px; border-top: 1px solid #E5E5E5; padding-top: 16px;">
+          <h4 style="margin-top: 0;">🔍 案件覆核對比</h4>
+          <input type="hidden" id="review-quote-id">
+          <input type="hidden" id="review-sign-id">
+          
+          <div style="display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 200px; background: #FFF; padding: 12px; border: 1px solid #E5E5E5; border-radius: 4px;">
+              <div style="font-size: 12px; color: #888;">原始系統紀錄</div>
+              <div id="review-original-info" style="font-size: 14px; margin-top: 8px; line-height: 1.5;"></div>
+            </div>
+            <div style="flex: 1; min-width: 200px; background: #FFF; padding: 12px; border: 1px solid #E5E5E5; border-radius: 4px;">
+              <div style="font-size: 12px; color: #888;">客戶初簽合約 PDF</div>
+              <div style="margin-top: 8px;">
+                <a id="review-pdf-link" href="#" target="_blank" style="color: #111111; font-size: 14px; font-weight: 600; text-decoration: underline;">📄 點擊開啟初簽 PDF</a>
+                <div id="review-ai-score" style="font-size: 13px; color: #28a745; margin-top: 8px; font-weight: 600;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; gap: 12px;">
+            <button class="btn-secondary btn-reject" style="flex: 1; color: #EF4444; border-color: #EF4444;" onclick="rejectReview()">退回修正</button>
+            <button class="btn-primary" style="flex: 2;" id="btn-approve-stamp" onclick="approveAndStamp()">核准用印 (AI 驗證與套印)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top: 0;">📄 待簽署報價單預覽</h3>
+        <div class="pdf-preview-box" id="pdf-preview-box">
+           <p style="margin-bottom: 8px;">報價單資訊帶入區 (發送連結時帶入)</p>
+           <input type="text" id="sign-quote-id" class="form-input" placeholder="請填寫報價單號 (例如 QT-20240101-120000)">
+        </div>
+        
+        <h3 style="margin-top: 20px;">✍️ 客戶電子簽章區</h3>
+        <div class="form-group">
+          <label>客戶正楷姓名</label>
+          <input type="text" id="sign-client-name" class="form-input" placeholder="請輸入姓名與同意意願">
+        </div>
+        <div class="form-group">
+          <label>公司名稱 (歸檔建檔用)</label>
+          <input type="text" id="sign-company-name" class="form-input" placeholder="請輸入公司名稱 (若為個人請填姓名)">
+        </div>
+        <div class="form-group">
+          <label>手機號碼 (用於簡訊驗證)</label>
+          <div style="display:flex; gap:8px;">
+            <input type="tel" id="sign-phone" class="form-input" placeholder="09XX-XXX-XXX" style="flex: 2;">
+            <button class="btn-secondary" style="flex: 1;" onclick="sendVerifyCode()">發送驗證碼</button>
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-top: 16px;">
+          <label style="display:flex; justify-content:space-between;">
+            <span>請在下方空白處簽名 (支援觸控)</span>
+            <span style="color:#888; font-size: 11px;">進度自動存檔</span>
+          </label>
+          <div class="signature-pad-container">
+            <canvas id="signature-pad"></canvas>
+          </div>
+        </div>
+        
+        <div style="display:flex; justify-content:space-between; margin-top: 16px;">
+          <button class="btn-secondary" onclick="clearSignature()">🗑️ 清除重簽</button>
+          <button class="btn-primary" id="btn-submit-sign" onclick="submitSignature()">✅ 確認同意並回簽</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 03 歸檔與追蹤 ==================== -->
+    <div id="tab3" class="tab-content">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="margin: 0; font-size: 16px;">📁 雲端歸檔與通知追蹤</h3>
+          <button class="btn-secondary" onclick="loadArchives()" style="height: 30px; font-size: 12px;">重新整理</button>
+        </div>
+        
+        <div class="archive-header-row">
+          <input type="text" id="archive-search" class="form-input" placeholder="🔍 搜尋單號、客戶或摘要..." onkeyup="filterArchives()" style="flex:2;">
+          <select id="archive-filter" class="form-input" onchange="filterArchives()" style="flex:1; background-color:#FFF;">
+            <option value="全部">全部標籤</option>
+            <option value="待履約追蹤">待履約追蹤</option>
+            <option value="已完結">已完結</option>
+          </select>
+        </div>
+
+        <div id="archive-list" style="margin-top: 16px;">
+          <div style="text-align: center; color: #888; font-size: 13px;">資料載入中...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /** 金科玉律 5：雙棲環境防禦宣告 */
+    const GAS_WEB_URL = "https://script.google.com/macros/s/AKfycbxKDzJ6CViZhgm75MLXmK9jO_ZM1Smo8Esy3wuj1JfD7PccBj4eNKp3TsLwKElRWmDb/exec";
+
+    // ----------------------------------------------------
+    // UI 頁籤與網路狀態
+    // ----------------------------------------------------
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelector(`.tab-item[data-target="${tabId}"]`).classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+
+      if(tabId === 'tab2') {
+        setTimeout(resizeCanvas, 100);
+        loadPendingReviews(); 
+      } else if (tabId === 'tab3') {
+        loadArchives();
+      }
+    }
+
+    function toggleSimulateBox() {
+      const box = document.getElementById('simulate-box');
+      box.style.display = (box.style.display === 'none') ? 'block' : 'none';
+    }
+
+    function updateNetworkStatus() {
+      const isOnline = navigator.onLine;
+      const dot = document.getElementById('network-dot');
+      const text = document.getElementById('network-text');
+      if (isOnline) {
+        dot.className = 'status-dot status-online';
+        text.textContent = 'Online'; text.style.color = '#111111';
+      } else {
+        dot.className = 'status-dot status-offline';
+        text.textContent = 'Offline'; text.style.color = '#dc3545';
+      }
+    }
+    window.addEventListener('online', updateNetworkStatus);
+    window.addEventListener('offline', updateNetworkStatus);
+
+    // ----------------------------------------------------
+    // Modals 邏輯 (AI 退件 & 歷史追蹤)
+    // ----------------------------------------------------
+    function showAiModal(msg) {
+      document.getElementById('ai-reject-msg').innerText = msg;
+      document.getElementById('ai-reject-modal').style.display = 'flex';
+    }
+    function closeAiModal() {
+      document.getElementById('ai-reject-modal').style.display = 'none';
+      clearSignature(); 
+    }
+
+    async function openHistoryModal(quoteId) {
+      document.getElementById('history-modal').style.display = 'flex';
+      const container = document.getElementById('history-log-container');
+      container.innerHTML = '<div style="text-align: center; color: #888; font-size: 13px;">載入歷程中...</div>';
+      try {
+        const logs = await apiCall('getHistoryLog', { quoteId });
+        if(!logs || logs.length === 0) {
+          container.innerHTML = '<div style="text-align: center; font-size: 13px;">查無歷程紀錄。</div>'; return;
+        }
+        let html = '';
+        logs.forEach(log => {
+          html += `
+            <div class="history-log-item">
+              <div class="history-time">${escapeHtml(log.timeStr)}</div>
+              <div>
+                <span class="history-module">[${escapeHtml(log.module)}]</span>
+                <span class="history-action">${escapeHtml(log.action)} - ${escapeHtml(log.statusDesc)}</span>
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      } catch (err) {
+        container.innerHTML = `<div style="text-align: center; color: #EF4444; font-size: 13px;">載入失敗: ${err.message}</div>`;
+      }
+    }
+    function closeHistoryModal() {
+      document.getElementById('history-modal').style.display = 'none';
+    }
+
+    // ----------------------------------------------------
+    // 核心 API 呼叫 (包含嚴格解包 res.data)
+    // ----------------------------------------------------
+    async function apiCall(action, payload) {
+      const requestData = { action: action, payload: payload };
+      try {
+        let res;
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+          res = await new Promise((resolve, reject) => {
+            google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).processBackendRouting(requestData); 
+          });
+        } else {
+          const response = await fetch(GAS_WEB_URL, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestData)
+          });
+          res = await response.json();
+        }
+        if (res.status !== "success") throw new Error(res.message || "伺服器處理失敗");
+        return res.data; 
+      } catch (error) {
+        console.error(`[API 錯誤] ${action} 失敗:`, error);
+        throw error;
+      }
+    }
+
+    // ----------------------------------------------------
+    // Timeline 與 報價單生成邏輯
+    // ----------------------------------------------------
+    async function loadRequirements() {
+      const timelineEl = document.getElementById('timeline-list');
+      timelineEl.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">載入中...</div>';
+      try {
+        const data = await apiCall('getRequirements', {});
+        renderTimeline(data);
+      } catch (err) { timelineEl.innerHTML = '<div style="text-align: center; color: #dc3545;">資料載入失敗。</div>'; }
+    }
+
+    function renderTimeline(items) {
+      const timelineEl = document.getElementById('timeline-list');
+      if (!items || items.length === 0) {
+        timelineEl.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">尚無需求紀錄。</div>'; return;
+      }
+      let html = '';
+      items.forEach(item => {
+        const tagsHtml = (item.serviceItems || []).map(tag => `<span class="tag-item">${escapeHtml(tag)}</span>`).join('');
+        html += `
+          <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-card">
+              <div class="timeline-header">
+                <div><div class="timeline-title">${escapeHtml(item.customerName || '未提供')}</div><div class="timeline-company">${escapeHtml(item.companyName || '未提供')}</div></div>
+                <div class="timeline-time">${escapeHtml(item.timeStr || '')}</div>
+              </div>
+              <div class="timeline-body">"${escapeHtml(item.rawMessage || '')}"</div><div>${tagsHtml}</div>
+              <div class="timeline-footer">
+                <div class="timeline-amount">預估金額：NT$ ${Number(item.estimatedAmount || 0).toLocaleString()}</div>
+                <button class="btn-import-draft" onclick='importToQuoteDraft(${JSON.stringify(item).replace(/'/g, "&apos;")})'>[帶入報價單草稿]</button>
+              </div>
+            </div></div>`;
+      });
+      timelineEl.innerHTML = html;
+    }
+
+    function importToQuoteDraft(item) {
+      document.getElementById('draft-req-id').value = item.reqId || '';
+      document.getElementById('draft-customer-name').value = item.customerName || '';
+      document.getElementById('draft-company-name').value = item.companyName || '';
+      const container = document.getElementById('dynamic-services-container');
+      container.innerHTML = ''; 
+      if (item.serviceItems && item.serviceItems.length > 0) {
+        const avgPrice = Math.floor((Number(item.estimatedAmount) || 0) / item.serviceItems.length);
+        item.serviceItems.forEach(service => addServiceRow(service, avgPrice));
+      } else { addServiceRow('', 0); }
+      document.getElementById('calc-discount').value = 0;
+      calculateTotal();
+      document.getElementById('quote-draft-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function addServiceRow(name = '', price = 0) {
+      const container = document.getElementById('dynamic-services-container');
+      const row = document.createElement('div');
+      row.className = 'service-row';
+      row.innerHTML = `
+        <input type="text" class="form-input service-name" placeholder="項目名稱" value="${escapeHtml(name)}" oninput="autoSaveDraft()">
+        <input type="number" class="form-input service-price" placeholder="價格" value="${price}" min="0" oninput="calculateTotal()">
+        <button type="button" class="btn-remove-row" onclick="removeServiceRow(this)">×</button>
+      `;
+      container.appendChild(row);
+      calculateTotal();
+    }
+    function removeServiceRow(btn) { btn.parentElement.remove(); calculateTotal(); }
+    
+    function calculateTotal() {
+      let originalTotal = 0;
+      document.querySelectorAll('.service-price').forEach(input => originalTotal += Number(input.value) || 0);
+      let discount = Number(document.getElementById('calc-discount').value) || 0;
+      if (discount < 0) discount = 0;
+      if (discount > originalTotal) discount = originalTotal; 
+      document.getElementById('calc-discount').value = discount;
+      document.getElementById('calc-original').textContent = originalTotal.toLocaleString();
+      document.getElementById('calc-final').textContent = (originalTotal - discount).toLocaleString();
+      autoSaveDraft();
+    }
+
+    function autoSaveDraft() {
+      const services = [];
+      document.querySelectorAll('.service-row').forEach(row => {
+        const name = row.querySelector('.service-name').value;
+        const price = Number(row.querySelector('.service-price').value) || 0;
+        if (name) services.push({ name, price });
+      });
+      localStorage.setItem('active_quote_draft', JSON.stringify({
+        reqId: document.getElementById('draft-req-id').value,
+        customerName: document.getElementById('draft-customer-name').value,
+        companyName: document.getElementById('draft-company-name').value,
+        services: services, discount: Number(document.getElementById('calc-discount').value) || 0
+      }));
+    }
+
+    function restoreDraftFromLocalStorage() {
+      const saved = localStorage.getItem('active_quote_draft');
+      if (saved) {
+        try {
+          const draftObj = JSON.parse(saved);
+          document.getElementById('draft-req-id').value = draftObj.reqId || '';
+          document.getElementById('draft-customer-name').value = draftObj.customerName || '';
+          document.getElementById('draft-company-name').value = draftObj.companyName || '';
+          document.getElementById('dynamic-services-container').innerHTML = '';
+          if (draftObj.services && draftObj.services.length > 0) {
+            draftObj.services.forEach(s => addServiceRow(s.name, s.price));
+          } else { addServiceRow('', 0); }
+          document.getElementById('calc-discount').value = draftObj.discount || 0;
+          calculateTotal();
+        } catch (e) { console.error('快取解析失敗', e); }
+      } else { addServiceRow('', 0); }
+    }
+
+    async function handleGenerateQuotePDF() {
+      const btn = document.getElementById('btn-generate-pdf');
+      const payload = {
+        reqId: document.getElementById('draft-req-id').value, customerName: document.getElementById('draft-customer-name').value,
+        companyName: document.getElementById('draft-company-name').value, discount: Number(document.getElementById('calc-discount').value) || 0,
+        services: []
+      };
+      document.querySelectorAll('.service-row').forEach(row => {
+        const name = row.querySelector('.service-name').value;
+        const price = Number(row.querySelector('.service-price').value) || 0;
+        if (name) payload.services.push({ name, price });
+      });
+      if (!payload.customerName || payload.services.length === 0) return alert("請填寫客戶姓名並新增一項服務。");
+
+      btn.disabled = true; btn.textContent = "AI 驗證與生成中...";
+      try {
+        const result = await apiCall('generateQuoteAndPDF', payload);
+        if (result.priceWarning) alert(`⚠️ AI 價格防呆警示：\n${result.priceWarning}`);
+        alert(`✅ 報價單生成成功！\n報價單號: ${result.quoteId}`);
+        
+        document.getElementById('sign-quote-id').value = result.quoteId;
+        document.getElementById('sign-company-name').value = payload.companyName || payload.customerName;
+
+        localStorage.removeItem('active_quote_draft');
+        document.getElementById('dynamic-services-container').innerHTML = '';
+        addServiceRow('', 0);
+        document.getElementById('draft-customer-name').value = ''; document.getElementById('draft-company-name').value = '';
+        calculateTotal();
+      } catch (err) { alert(`生成失敗：${err.message}`); } finally {
+        btn.disabled = false; btn.textContent = "產生 PDF 報價單並發送";
+      }
+    }
+
+    async function handleSimulateLineMsg() {
+      const rawText = document.getElementById('line-input').value.trim();
+      if (!rawText) return alert('請輸入對話內容！');
+      document.getElementById('btn-sim-send').disabled = true;
+      try {
+        await apiCall('simulateLineMessage', { rawText: rawText });
+        alert('解析完成！'); document.getElementById('line-input').value = ''; loadRequirements();
+      } catch (err) { alert('解析失敗：' + err.message); } finally { document.getElementById('btn-sim-send').disabled = false; }
+    }
+
+    // ----------------------------------------------------
+    // 電子簽名 Canvas 邏輯
+    // ----------------------------------------------------
+    let canvas, ctx, isDrawing = false;
+    
+    function initCanvas() {
+      canvas = document.getElementById('signature-pad');
+      if (!canvas) return;
+      ctx = canvas.getContext('2d');
+      window.addEventListener('resize', resizeCanvas);
+      
+      canvas.addEventListener('mousedown', startDrawing);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDrawing);
+      canvas.addEventListener('mouseout', stopDrawing);
+      
+      canvas.addEventListener('touchstart', startDrawing, {passive: false});
+      canvas.addEventListener('touchmove', draw, {passive: false});
+      canvas.addEventListener('touchend', stopDrawing, {passive: false});
+    }
+
+    function resizeCanvas() {
+      if(!canvas || canvas.offsetWidth === 0) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width; 
+      canvas.height = 200;
+      ctx.lineWidth = 3;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "#111111";
+      restoreSignatureFromLocal();
+    }
+
+    function getPointerPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      let clientX = e.clientX;
+      let clientY = e.clientY;
+      if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      }
+      return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    function startDrawing(e) {
+      e.preventDefault();
+      isDrawing = true;
+      const pos = getPointerPos(e);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
+
+    function draw(e) {
+      if (!isDrawing) return;
+      e.preventDefault();
+      const pos = getPointerPos(e);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+    }
+
+    function stopDrawing(e) {
+      if (!isDrawing) return;
+      e.preventDefault();
+      isDrawing = false;
+      saveSignatureToLocal();
+    }
+
+    function clearSignature() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      localStorage.removeItem('client_signature_draft');
+    }
+
+    function saveSignatureToLocal() {
+      if(canvas) localStorage.setItem('client_signature_draft', canvas.toDataURL());
+    }
+
+    function restoreSignatureFromLocal() {
+      const dataURL = localStorage.getItem('client_signature_draft');
+      if (dataURL && ctx) {
+        let img = new Image();
+        img.onload = function() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0);
+        };
+        img.src = dataURL;
+      }
+    }
+
+    function sendVerifyCode() {
+      const phone = document.getElementById('sign-phone').value;
+      if(!phone) return alert("請先填寫手機號碼");
+      alert(`已發送模擬簡訊驗證碼至 ${phone}！\n(此為展示功能)`);
+    }
+
+    async function submitSignature() {
+      const quoteId = document.getElementById('sign-quote-id').value.trim();
+      const clientName = document.getElementById('sign-client-name').value.trim();
+      const companyName = document.getElementById('sign-company-name').value.trim() || clientName;
+      const phone = document.getElementById('sign-phone').value.trim();
+      
+      if(!quoteId) return alert("請帶入或填寫報價單號");
+      if(!clientName || !phone) return alert("請填寫姓名與手機號碼");
+      
+      const blankCanvas = document.createElement('canvas');
+      blankCanvas.width = canvas.width; blankCanvas.height = canvas.height;
+      if (canvas.toDataURL() === blankCanvas.toDataURL()) {
+        return alert("請在畫布上簽名！");
+      }
+
+      const signatureBase64 = canvas.toDataURL(); 
+      const btn = document.getElementById('btn-submit-sign');
+      btn.disabled = true;
+      btn.textContent = "AI 防偽鑑識中...";
+
+      try {
+        const payload = { quoteId, clientName, companyName, phone, signatureBase64 };
+        await apiCall('saveClientSignature', payload);
+        
+        alert(`✅ 簽署完成！\n初簽 PDF 已歸檔至待覆核資料夾。`);
+        clearSignature(); 
+        
+        loadPendingReviews();
+      } catch(err) {
+        if (err.message.includes('AI防偽檢驗未通過')) {
+          showAiModal(err.message);
+        } else {
+          alert("簽署提交失敗：" + err.message);
+        }
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "✅ 確認同意並回簽";
+      }
+    }
+
+    // ----------------------------------------------------
+    // 行政覆核與用印邏輯
+    // ----------------------------------------------------
+    let currentReviewItem = null;
+
+    async function loadPendingReviews() {
+      const listEl = document.getElementById('pending-review-list');
+      listEl.innerHTML = '<div style="text-align: center; color: #888; font-size: 13px;">資料載入中...</div>';
+      try {
+        const reviews = await apiCall('getPendingReviews', {});
+        if (!reviews || reviews.length === 0) {
+          listEl.innerHTML = '<div style="text-align: center; color: #888; font-size: 13px;">目前無待覆核案件。</div>';
+          document.getElementById('review-detail-box').style.display = 'none';
+          return;
+        }
+
+        let html = '';
+        reviews.forEach(item => {
+          html += `
+            <div class="review-list-item" onclick='openReviewDetail(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
+              <div>
+                <div style="font-weight:600; font-size:14px;">${escapeHtml(item.clientName)} - ${escapeHtml(item.quoteId)}</div>
+                <div style="font-size:12px; color:#888; margin-top:4px;">簽署時間：${escapeHtml(item.signTime)}</div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size:11px; color:#111; background:#F8F9FA; padding:2px 6px; border-radius:4px; border:1px solid #E5E5E5;">${escapeHtml(item.aiResult)}</div>
+              </div>
+            </div>
+          `;
+        });
+        listEl.innerHTML = html;
+      } catch (err) {
+        listEl.innerHTML = `<div style="text-align: center; color: #EF4444; font-size: 13px;">載入失敗: ${err.message}</div>`;
+      }
+    }
+
+    function openReviewDetail(item) {
+      currentReviewItem = item;
+      document.getElementById('review-detail-box').style.display = 'block';
+      document.getElementById('review-quote-id').value = item.quoteId;
+      document.getElementById('review-sign-id').value = item.signId;
+      
+      document.getElementById('review-original-info').innerHTML = `
+        <strong>報價單號:</strong> ${escapeHtml(item.quoteId)}<br>
+        <strong>客戶姓名:</strong> ${escapeHtml(item.clientName)}<br>
+        <strong>公司名稱:</strong> ${escapeHtml(item.companyName)}<br>
+        <strong>原始報價金額:</strong> NT$ ${Number(item.finalPrice).toLocaleString()}
+      `;
+      
+      document.getElementById('review-pdf-link').href = item.contractPdfUrl;
+      document.getElementById('review-ai-score').innerText = `✅ 系統初檢：${item.aiResult}`;
+      
+      document.getElementById('review-detail-box').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function rejectReview() {
+      if (!currentReviewItem) return;
+      const reason = prompt("請輸入退件原因：");
+      if (reason === null) return; 
+      alert(`已退回案件：${currentReviewItem.quoteId}\n原因：${reason || '未填寫'}`);
+      document.getElementById('review-detail-box').style.display = 'none';
+    }
+
+    async function approveAndStamp() {
+      if (!currentReviewItem) return;
+      const btn = document.getElementById('btn-approve-stamp');
+      btn.disabled = true;
+      btn.textContent = "AI 比對金額與歸檔中...";
+
+      try {
+        const payload = {
+          signId: currentReviewItem.signId,
+          quoteId: currentReviewItem.quoteId,
+          clientName: currentReviewItem.clientName,
+          companyName: currentReviewItem.companyName,
+          originalPrice: currentReviewItem.finalPrice,
+          contractPdfUrl: currentReviewItem.contractPdfUrl
+        };
+        
+        await apiCall('approveAndStampContract', payload);
+        
+        alert(`✅ 用印完成並已觸發雲端自動歸檔！\n資料夾與合約已成功建立。`);
+        document.getElementById('review-detail-box').style.display = 'none';
+        loadPendingReviews(); 
+        switchTab('tab3'); 
+        
+      } catch (err) {
+        alert("核准用印失敗：" + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "核准用印 (AI 驗證與套印)";
+      }
+    }
+
+    // ----------------------------------------------------
+    // 階段八/九/十：雲端歸檔、智慧摘要、多通道派發與 Log 追蹤
+    // ----------------------------------------------------
+    let allArchives = [];
+
+    async function loadArchives() {
+      const listEl = document.getElementById('archive-list');
+      listEl.innerHTML = '<div style="text-align: center; color: #888; font-size: 13px;">資料載入中...</div>';
+      try {
+        allArchives = await apiCall('getArchives', {});
+        filterArchives(); 
+      } catch (err) {
+        listEl.innerHTML = `<div style="text-align: center; color: #EF4444; font-size: 13px;">載入失敗: ${err.message}</div>`;
+      }
+    }
+
+    function filterArchives() {
+      const listEl = document.getElementById('archive-list');
+      const searchText = document.getElementById('archive-search').value.toLowerCase();
+      const filterTag = document.getElementById('archive-filter').value;
+
+      if (!allArchives || allArchives.length === 0) {
+        listEl.innerHTML = '<div style="text-align: center; color: #888; font-size: 13px;">目前無歸檔紀錄。</div>';
+        return;
+      }
+
+      const filtered = allArchives.filter(item => {
+        const keywordMatch = (item.quoteId || '').toLowerCase().includes(searchText) || 
+                             (item.summary || '').toLowerCase().includes(searchText) || 
+                             (item.tags || []).join(' ').toLowerCase().includes(searchText);
+        let tagMatch = true;
+        if (filterTag !== '全部') {
+          tagMatch = (item.tags || []).includes(filterTag);
+        }
+        return keywordMatch && tagMatch;
+      });
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = '<div style="text-align: center; color: #888; font-size: 13px;">查無符合的歸檔紀錄。</div>';
+        return;
+      }
+
+      let html = '<div class="timeline-container" style="margin-top:0;">';
+      filtered.forEach(item => {
+        const isSummaryReady = !!item.summary;
+        const isEmailFailed = item.mailStatus === 'Email_Failed';
+        const hasDispatch = !!item.mailStatus && !isEmailFailed;
+
+        const tagsHtml = (item.tags || []).map(tag => `<span class="tag-item tag-dynamic">${escapeHtml(tag)}</span>`).join('');
+        
+        let calloutHtml = isSummaryReady 
+          ? `<div class="timeline-body" style="margin: 8px 0;">✨ <strong>AI 智慧摘要：</strong><br>${escapeHtml(item.summary)}</div><div style="margin-bottom: 8px;">${tagsHtml}</div>`
+          : `<div class="timeline-body" style="margin: 8px 0; display:flex; justify-content:space-between; align-items:center;"><span style="color:#888;">尚未產出智慧摘要</span><button class="btn-secondary" style="font-size:11px;" onclick="triggerSmartSummary('${item.archiveId}', '${item.finalPdfUrl}')">產生智慧摘要</button></div>`;
+
+        // 階段十：派發與行事曆綁定狀態列
+        let dispatchHtml = '';
+        if (isEmailFailed) {
+          dispatchHtml = `
+            <div style="background:#fef2f2; border:1px solid #fecaca; padding:8px; border-radius:4px; margin-bottom:8px; display:flex; gap:8px; align-items:center;">
+              <span style="color:#991b1b; font-size:12px; font-weight:600;">⚠️ 郵件未送達</span>
+              <input type="email" id="email-${item.archiveId}" class="form-input" style="height:28px; font-size:12px; flex:1;" placeholder="請輸入正確 Email" value="test@example.com">
+              <button class="btn-primary" style="background:#EF4444; height:28px; font-size:11px; padding:0 8px;" onclick="dispatchAndRemind('${item.archiveId}', '${item.quoteId}', '${item.finalPdfUrl}')">一鍵手動補寄</button>
+            </div>`;
+        } else if (!hasDispatch) {
+          dispatchHtml = `
+            <div style="background:#f8fafc; border:1px dashed #cbd5e1; padding:8px; border-radius:4px; margin-bottom:8px; display:flex; gap:8px; align-items:center;">
+              <input type="email" id="email-${item.archiveId}" class="form-input" style="height:28px; font-size:12px; flex:1;" placeholder="填寫 Email 派送合約與日曆提醒">
+              <button class="btn-secondary" style="height:28px; font-size:11px; padding:0 8px;" onclick="dispatchAndRemind('${item.archiveId}', '${item.quoteId}', '${item.finalPdfUrl}')">派發通知與行事曆</button>
+            </div>`;
+        } else {
+          // 已成功派送
+          dispatchHtml = `<div style="font-size:11px; color:#64748b; margin-bottom:8px;">✅ 已完成自動派送與日曆行程綁定</div>`;
+        }
+
+        html += `
+          <div class="timeline-item">
+            <div class="timeline-dot" style="background-color: #28a745; border-color: #d1fae5;"></div>
+            <div class="timeline-card">
+              <div class="timeline-header">
+                <div>
+                  <div class="timeline-title">${escapeHtml(item.quoteId)}</div>
+                  <div style="font-size:12px; color:#888; margin-top:4px;">審核時間：${escapeHtml(item.approveTime)}</div>
+                </div>
+                <div>
+                  ${isEmailFailed ? '<span class="badge-failed">派發異常</span>' : (hasDispatch ? '<span class="badge-success">派送完成</span>' : '<span class="badge-success">歸檔完成</span>')}
+                </div>
+              </div>
+              
+              ${calloutHtml}
+              ${dispatchHtml}
+              
+              <div class="timeline-footer" style="border-top:1px solid #E5E5E5; padding-top:8px; margin-top:4px;">
+                <button class="btn-secondary" style="font-size:11px; border:none; color:#475569; padding:0;" onclick="openHistoryModal('${item.quoteId}')">📜 完整歷程 Log</button>
+                <div>
+                  <a href="${item.finalPdfUrl}" target="_blank" style="font-size:12px; color:#111; font-weight:600; text-decoration:none; margin-right:12px;">📄 查看合約</a>
+                  <button class="btn-primary" style="height:28px; font-size:11px; padding:0 10px;" onclick="window.open('${item.folderUrl}', '_blank')">📁 開啟資料夾</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      listEl.innerHTML = html;
+    }
+
+    async function triggerSmartSummary(archiveId, pdfUrl) {
+      const listEl = document.getElementById('archive-list');
+      listEl.innerHTML = '<div style="text-align: center; color: #888; font-size: 13px;">AI 解析合約中，請稍候...</div>';
+      try {
+        await apiCall('generateContractSummary', { archiveId, pdfUrl });
+        loadArchives(); 
+      } catch (err) {
+        alert("產生摘要失敗：" + err.message);
+        loadArchives(); 
+      }
+    }
+
+    async function dispatchAndRemind(archiveId, quoteId, pdfUrl) {
+      const emailInput = document.getElementById(`email-${archiveId}`);
+      const email = emailInput ? emailInput.value.trim() : '';
+      if(!email) return alert("請輸入客戶 Email");
+      
+      const btn = event.target;
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "自動化派送中...";
+
+      try {
+        await apiCall('finalDispatchAndRemind', { archiveId, quoteId, email, pdfUrl });
+        alert(`✅ 派發成功！\n已寄出合約 Email 並綁定 Google Calendar 續約提醒。`);
+        loadArchives(); // 重新整理狀態
+      } catch (err) {
+        if(err.message.includes('Email_Failed')) {
+          alert(`⚠️ 派發失敗：信箱格式錯誤或被退信。\n請修正信箱後點擊「一鍵手動補寄」。`);
+        } else {
+          alert("自動派送發生錯誤：" + err.message);
+        }
+        loadArchives(); // 重載以顯示紅色警告卡片
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      updateNetworkStatus();
+      restoreDraftFromLocalStorage();
+      loadRequirements();
+      initCanvas();
+    });
+  </script>
+</body>
+</html>
+  </body>
+</html>
