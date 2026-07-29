@@ -1,12 +1,7 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <base target="_top">
-  </head>
-  <body>
-    <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+  <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Easy V.C. Quote & Sign</title>
@@ -447,7 +442,7 @@
   </div>
 
   <script>
-    /** 金科玉律 5：雙棲環境防禦宣告 */
+    /** 金科玉律 5：雙棲環境防禦宣告 (若重新部署，請務必更新下方網址) */
     const GAS_WEB_URL = "https://script.google.com/macros/s/AKfycbxKDzJ6CViZhgm75MLXmK9jO_ZM1Smo8Esy3wuj1JfD7PccBj4eNKp3TsLwKElRWmDb/exec";
 
     // ----------------------------------------------------
@@ -530,7 +525,7 @@
     }
 
     // ----------------------------------------------------
-    // 核心 API 呼叫 (包含嚴格解包 res.data)
+    // 核心 API 呼叫 (包含嚴格解包 res.data 與 CORS 修復)
     // ----------------------------------------------------
     async function apiCall(action, payload) {
       const requestData = { action: action, payload: payload };
@@ -541,8 +536,11 @@
             google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).processBackendRouting(requestData); 
           });
         } else {
+          // 修復 CORS Preflight 攔截：強制使用 text/plain 發送
           const response = await fetch(GAS_WEB_URL, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestData)
+            method: 'POST', 
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+            body: JSON.stringify(requestData)
           });
           res = await response.json();
         }
@@ -563,7 +561,7 @@
       try {
         const data = await apiCall('getRequirements', {});
         renderTimeline(data);
-      } catch (err) { timelineEl.innerHTML = '<div style="text-align: center; color: #dc3545;">資料載入失敗。</div>'; }
+      } catch (err) { timelineEl.innerHTML = '<div style="text-align: center; color: #dc3545;">資料載入失敗，請確認網路或 API 網址是否正確。</div>'; }
     }
 
     function renderTimeline(items) {
@@ -1089,6 +1087,4 @@
     });
   </script>
 </body>
-</html>
-  </body>
 </html>
