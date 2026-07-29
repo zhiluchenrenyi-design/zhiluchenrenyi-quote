@@ -5,6 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Easy V.C. Quote & Sign</title>
+  
+  <!-- 引入 html2pdf.js 套件 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
   <style>
     /* 全局樣式設定 */
     * {
@@ -174,18 +178,6 @@
       border: none; border-radius: 4px; padding: 0 14px; cursor: pointer; transition: background-color 0.2s;
     }
 
-    /* 動態服務項目列表 */
-    .service-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
-    .service-row input[type="text"] { flex: 2; }
-    .service-row input[type="number"] { flex: 1; }
-    .btn-remove-row { background: none; border: none; color: #dc3545; font-size: 16px; font-weight: bold; cursor: pointer; padding: 0 4px; }
-    
-    /* 金額結算區塊 */
-    .summary-box { background-color: #FFFFFF; border: 1px solid #E5E5E5; border-radius: 6px; padding: 12px; margin-top: 16px; font-size: 14px; }
-    .summary-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .summary-row:last-child { margin-bottom: 0; padding-top: 8px; border-top: 1px dashed #E5E5E5; font-weight: 700; font-size: 16px; }
-    .summary-input { width: 100px; text-align: right; padding: 4px 8px; border: 1px solid #E5E5E5; border-radius: 4px; }
-
     /* 終極生成按鈕 */
     .btn-generate-pdf {
       width: 100%; height: 48px; background-color: #111111; color: #FFFFFF; font-size: 15px;
@@ -237,9 +229,50 @@
     .history-action { color: #334155; }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* 用於 html2pdf 的隱藏委任書範本，定位在可視區外以利正確渲染 */
+    #contract-template-container {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      width: 800px;
+    }
   </style>
 </head>
 <body>
+
+  <!-- 隱藏的委任書 HTML 模板 (html2pdf 使用) -->
+  <div id="contract-template-container">
+    <div id="contract-content" style="padding: 50px; font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; color: #000; background: #fff; line-height: 1.8; font-size: 15px;">
+      <h2 style="text-align: center; margin-bottom: 30px; font-size: 22px;">代理稅務申報委任書</h2>
+      <p>茲委任 智嵂會計師事務所 為本公司代理稅務申報相關事宜，約定條款如下：</p>
+      <p>一、委任期間：<span id="tpl-period" style="font-weight:bold;"></span>，至以後解除委任關係時終止(雙方均得隨時解除委任)。</p>
+      <p>二、委任範圍：<span id="tpl-scope" style="font-weight:bold;"></span></p>
+      <p>三、辦理程度：依據「所得稅法」、「加值型及非加值型營業稅法」及其他有關法令規定，就委任人所提供之憑證資料代為處理相關申報，以供稽徵機關查核。</p>
+      <p>四、酬&nbsp;&nbsp;&nbsp;&nbsp;金：<span id="tpl-fee" style="font-weight:bold;"></span>。<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;任何調整記帳費用時，由雙方重新議定之。</p>
+      <p>五、其他約定事項：</p>
+      <ol style="padding-left: 24px; margin-top: 5px;">
+        <li style="margin-bottom: 6px;">委任人深知提供足以公正表達公司財務狀況、營業結果、課稅所得額之憑證及攸關資料，乃委任人之責任，若因提供不實或不完整的資料及憑證，致使受任人遭受有形及（或）無形損失時，其一切法律責任及損失由委任人負責之。</li>
+        <li style="margin-bottom: 6px;">除經法院判決確定係受任人之故意或重大過失，受任人因提供本委任書之服務，無論其原因為何，受任人對委任人之最高賠償責任限於返還受任人因提供該項服務或工作成果已收取之公費；倘有任何其他第三人因此向受任人主張任何權利者，無論其原因為何，委任人同意補償並確保受任人及受任人之人員不遭受任何索賠、責任、費用及損失。</li>
+        <li style="margin-bottom: 6px;">受任人對職務上所獲悉有關委任人經營上(包括營業、技術、財務、人事等)之機密應盡保密之責，如有洩密願負法律之責任。</li>
+        <li style="margin-bottom: 6px;">前3項之約定，於本委任書完成、終止或解除後，仍繼續有效。</li>
+        <li style="margin-bottom: 6px;">受任人以委任人提供的資料作為申報之依據。</li>
+        <li style="margin-bottom: 6px;">委任人若不於各項申報日規定期限日前提供受任人所指定之各項憑證、表報等資料，因而造成遲報滯報時，受任人不須負責。</li>
+        <li style="margin-bottom: 6px;">若後續服務之範圍或內容與本委任書不一致，將與委任人管理階層就異動內容達成共識，並以委任書或其他適當形式之書面協議予以約定，以釐清雙方之權利義務。</li>
+        <li style="margin-bottom: 6px;">本委任書由受、委雙方各執一份。</li>
+      </ol>
+      <div style="margin-top: 40px;">
+        <p style="margin: 5px 0;">委&nbsp;&nbsp;任&nbsp;&nbsp;人：<span id="tpl-company" style="font-weight:bold;"></span></p>
+        <p style="margin: 5px 0;">代&nbsp;&nbsp;表&nbsp;&nbsp;人：<span id="tpl-rep" style="font-weight:bold;"></span></p>
+        <p style="margin: 5px 0;">地&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;址：<span id="tpl-address" style="font-weight:bold;"></span></p>
+        <p style="margin: 5px 0;">受&nbsp;&nbsp;任&nbsp;&nbsp;人：智嵂會計師事務所</p>
+        <p style="margin: 5px 0;">事務所地址：台中市西區忠明南路237號12樓之2</p>
+        <p style="margin: 5px 0;">電&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;話：<span id="tpl-phone" style="font-weight:bold;"></span></p>
+        <p style="margin-top: 30px; font-weight:bold;"><span id="tpl-date"></span></p>
+      </div>
+    </div>
+  </div>
 
   <!-- AI 退件專屬 Modal -->
   <div id="ai-reject-modal" class="modal-overlay">
@@ -304,40 +337,7 @@
         </div>
       </div>
 
-      <!-- 📝 行動報價單快速生成區 -->
-      <div class="card" id="quote-draft-section">
-        <h3 style="margin-top: 0; font-size: 16px; font-weight: 700; margin-bottom: 12px;">📝 行動報價單快速生成區</h3>
-        <input type="hidden" id="draft-req-id">
-        <div class="form-group">
-          <label>客戶姓名</label>
-          <input type="text" id="draft-customer-name" class="form-input" placeholder="客戶姓名">
-        </div>
-        <div class="form-group">
-          <label>公司名稱</label>
-          <input type="text" id="draft-company-name" class="form-input" placeholder="公司名稱">
-        </div>
-        
-        <div class="form-group" style="margin-top: 16px;">
-          <label style="display:flex; justify-content:space-between; align-items:center;">
-            <span>報價服務項目</span>
-            <button class="btn-secondary" style="font-size: 11px; padding: 2px 6px;" onclick="addServiceRow('', 0)">+ 新增項目</button>
-          </label>
-          <div id="dynamic-services-container"></div>
-        </div>
-
-        <div class="summary-box">
-          <div class="summary-row"><span>原價合計 (NT$)</span><span id="calc-original">0</span></div>
-          <div class="summary-row">
-            <span>折扣金額 (NT$)</span>
-            <input type="number" id="calc-discount" class="summary-input" value="0" min="0" oninput="calculateTotal()">
-          </div>
-          <div class="summary-row"><span>最終報價 (NT$)</span><span id="calc-final" style="color:#d93025;">0</span></div>
-        </div>
-        <button class="btn-generate-pdf" id="btn-generate-pdf" onclick="handleGenerateQuotePDF()">產生 PDF 報價單並發送</button>
-        <div id="draft-status" style="font-size: 12px; color: #888888; text-align:center; margin-top:10px;">表單異動已自動同步至 LocalStorage</div>
-      </div>
-
-      <!-- 📄 產生代理稅務申報委任書區塊 (新增) -->
+      <!-- 📄 產生代理稅務申報委任書區塊 (純前端 PDF) -->
       <div class="card" id="commission-doc-section">
         <h3 style="margin-top: 0; font-size: 16px; font-weight: 700; margin-bottom: 12px;">📄 產生代理稅務申報委任書</h3>
         <input type="hidden" id="comm-req-id">
@@ -354,23 +354,26 @@
           <input type="text" id="comm-address" class="form-input" placeholder="公司地址">
         </div>
         <div class="form-group">
-          <label>委任期間</label>
-          <input type="text" id="comm-period" class="form-input" placeholder="例如：113年1月1日至113年12月31日">
+          <label>電話</label>
+          <input type="text" id="comm-phone" class="form-input" placeholder="聯絡電話">
         </div>
         <div class="form-group">
-          <label>日期 (委任起算日)</label>
-          <input type="text" id="comm-date" class="form-input" placeholder="例如：113年1月1日">
+          <label>委任期間</label>
+          <input type="text" id="comm-period" class="form-input" placeholder="例如：自民國115年08月01日起">
+        </div>
+        <div class="form-group">
+          <label>日期 (委任起算日/簽署日)</label>
+          <input type="text" id="comm-date" class="form-input" placeholder="例如：中華民國115年8月1日">
         </div>
         <div class="form-group">
           <label>委任範圍</label>
-          <input type="text" id="comm-scope" class="form-input" value="工商登記與帳務代理">
+          <input type="text" id="comm-scope" class="form-input" value="辦理上開期間依據委任人提供之憑證資料辦理營業稅申報、暫繳申報、扣繳及免扣繳憑單申報及營利事業所得稅結算申報事宜。">
         </div>
         <div class="form-group">
           <label>酬金</label>
-          <input type="text" id="comm-fee" class="form-input" placeholder="例如：每月 3,000 元">
+          <input type="text" id="comm-fee" class="form-input" placeholder="例如：每月$2,000，壹年收取14個月/每單月十五日前收取前兩個月的記帳費">
         </div>
-        <button class="btn-generate-pdf" id="btn-generate-comm" onclick="handleGenerateCommission()">產生委任書</button>
-        <div id="comm-result" style="margin-top:12px; font-size:14px; text-align:center;"></div>
+        <button class="btn-generate-pdf" id="btn-generate-comm" onclick="handleGenerateCommission()">產生委任書 PDF</button>
       </div>
 
     </div>
@@ -415,10 +418,10 @@
       </div>
 
       <div class="card">
-        <h3 style="margin-top: 0;">📄 待簽署報價單預覽</h3>
+        <h3 style="margin-top: 0;">📄 待簽署單據預覽</h3>
         <div class="pdf-preview-box" id="pdf-preview-box">
-           <p style="margin-bottom: 8px;">報價單資訊帶入區 (發送連結時帶入)</p>
-           <input type="text" id="sign-quote-id" class="form-input" placeholder="請填寫報價單號 (例如 QT-20240101-120000)">
+           <p style="margin-bottom: 8px;">簽署資訊帶入區 (發送連結時帶入)</p>
+           <input type="text" id="sign-quote-id" class="form-input" placeholder="請填寫單號 (例如 REQ-20240101)">
         </div>
         
         <h3 style="margin-top: 20px;">✍️ 客戶電子簽章區</h3>
@@ -591,7 +594,7 @@
     }
 
     // ----------------------------------------------------
-    // Timeline 與 報價單生成邏輯
+    // Timeline 與 委任書表單帶入邏輯
     // ----------------------------------------------------
     async function loadRequirements() {
       const timelineEl = document.getElementById('timeline-list');
@@ -619,128 +622,23 @@
               <div class="timeline-body">"${escapeHtml(item.rawMessage || '')}"</div><div>${tagsHtml}</div>
               <div class="timeline-footer">
                 <div class="timeline-amount">預估金額：NT$ ${Number(item.estimatedAmount || 0).toLocaleString()}</div>
-                <button class="btn-import-draft" onclick='importToQuoteDraft(${JSON.stringify(item).replace(/'/g, "&apos;")})'>[帶入報價單草稿]</button>
+                <button class="btn-import-draft" onclick='importToCommissionForm(${JSON.stringify(item).replace(/'/g, "&apos;")})'>[帶入委任書表單]</button>
               </div>
             </div></div>`;
       });
       timelineEl.innerHTML = html;
     }
 
-    function importToQuoteDraft(item) {
-      // 帶入報價單區塊
-      document.getElementById('draft-req-id').value = item.reqId || '';
-      document.getElementById('draft-customer-name').value = item.customerName || '';
-      document.getElementById('draft-company-name').value = item.companyName || '';
-      const container = document.getElementById('dynamic-services-container');
-      container.innerHTML = ''; 
-      if (item.serviceItems && item.serviceItems.length > 0) {
-        const avgPrice = Math.floor((Number(item.estimatedAmount) || 0) / item.serviceItems.length);
-        item.serviceItems.forEach(service => addServiceRow(service, avgPrice));
-      } else { addServiceRow('', 0); }
-      document.getElementById('calc-discount').value = 0;
-      calculateTotal();
-      document.getElementById('quote-draft-section').scrollIntoView({ behavior: 'smooth' });
-
-      // 同時預先帶入委任書區塊欄位
+    function importToCommissionForm(item) {
+      // 帶入委任書區塊欄位
       document.getElementById('comm-req-id').value = item.reqId || '';
       document.getElementById('comm-company').value = item.companyName || '';
       document.getElementById('comm-rep').value = item.customerName || '';
-    }
-
-    function addServiceRow(name = '', price = 0) {
-      const container = document.getElementById('dynamic-services-container');
-      const row = document.createElement('div');
-      row.className = 'service-row';
-      row.innerHTML = `
-        <input type="text" class="form-input service-name" placeholder="項目名稱" value="${escapeHtml(name)}" oninput="autoSaveDraft()">
-        <input type="number" class="form-input service-price" placeholder="價格" value="${price}" min="0" oninput="calculateTotal()">
-        <button type="button" class="btn-remove-row" onclick="removeServiceRow(this)">×</button>
-      `;
-      container.appendChild(row);
-      calculateTotal();
-    }
-    function removeServiceRow(btn) { btn.parentElement.remove(); calculateTotal(); }
-    
-    function calculateTotal() {
-      let originalTotal = 0;
-      document.querySelectorAll('.service-price').forEach(input => originalTotal += Number(input.value) || 0);
-      let discount = Number(document.getElementById('calc-discount').value) || 0;
-      if (discount < 0) discount = 0;
-      if (discount > originalTotal) discount = originalTotal; 
-      document.getElementById('calc-discount').value = discount;
-      document.getElementById('calc-original').textContent = originalTotal.toLocaleString();
-      document.getElementById('calc-final').textContent = (originalTotal - discount).toLocaleString();
-      autoSaveDraft();
-    }
-
-    function autoSaveDraft() {
-      const services = [];
-      document.querySelectorAll('.service-row').forEach(row => {
-        const name = row.querySelector('.service-name').value;
-        const price = Number(row.querySelector('.service-price').value) || 0;
-        if (name) services.push({ name, price });
-      });
-      localStorage.setItem('active_quote_draft', JSON.stringify({
-        reqId: document.getElementById('draft-req-id').value,
-        customerName: document.getElementById('draft-customer-name').value,
-        companyName: document.getElementById('draft-company-name').value,
-        services: services, discount: Number(document.getElementById('calc-discount').value) || 0
-      }));
-    }
-
-    function restoreDraftFromLocalStorage() {
-      const saved = localStorage.getItem('active_quote_draft');
-      if (saved) {
-        try {
-          const draftObj = JSON.parse(saved);
-          document.getElementById('draft-req-id').value = draftObj.reqId || '';
-          document.getElementById('draft-customer-name').value = draftObj.customerName || '';
-          document.getElementById('draft-company-name').value = draftObj.companyName || '';
-          document.getElementById('dynamic-services-container').innerHTML = '';
-          if (draftObj.services && draftObj.services.length > 0) {
-            draftObj.services.forEach(s => addServiceRow(s.name, s.price));
-          } else { addServiceRow('', 0); }
-          document.getElementById('calc-discount').value = draftObj.discount || 0;
-          calculateTotal();
-        } catch (e) { console.error('快取解析失敗', e); }
-      } else { addServiceRow('', 0); }
-    }
-
-    async function handleGenerateQuotePDF() {
-      const btn = document.getElementById('btn-generate-pdf');
-      const payload = {
-        reqId: document.getElementById('draft-req-id').value, customerName: document.getElementById('draft-customer-name').value,
-        companyName: document.getElementById('draft-company-name').value, discount: Number(document.getElementById('calc-discount').value) || 0,
-        services: []
-      };
-      document.querySelectorAll('.service-row').forEach(row => {
-        const name = row.querySelector('.service-name').value;
-        const price = Number(row.querySelector('.service-price').value) || 0;
-        if (name) payload.services.push({ name, price });
-      });
-      if (!payload.customerName || payload.services.length === 0) return alert("請填寫客戶姓名並新增一項服務。");
-
-      btn.disabled = true; btn.textContent = "AI 驗證與生成中...";
-      try {
-        const result = await apiCall('generateQuoteAndPDF', payload);
-        if (result.priceWarning) alert(`⚠️ AI 價格防呆警示：\n${result.priceWarning}`);
-        alert(`✅ 報價單生成成功！\n報價單號: ${result.quoteId}`);
-        
-        document.getElementById('sign-quote-id').value = result.quoteId;
-        document.getElementById('sign-company-name').value = payload.companyName || payload.customerName;
-
-        localStorage.removeItem('active_quote_draft');
-        document.getElementById('dynamic-services-container').innerHTML = '';
-        addServiceRow('', 0);
-        document.getElementById('draft-customer-name').value = ''; document.getElementById('draft-company-name').value = '';
-        calculateTotal();
-      } catch (err) { alert(`生成失敗：${err.message}`); } finally {
-        btn.disabled = false; btn.textContent = "產生 PDF 報價單並發送";
-      }
+      document.getElementById('commission-doc-section').scrollIntoView({ behavior: 'smooth' });
     }
 
     // ----------------------------------------------------
-    // 新增：產生代理稅務申報委任書邏輯
+    // 純前端生成 PDF 委任書邏輯與更新後端
     // ----------------------------------------------------
     async function handleGenerateCommission() {
       const reqId = document.getElementById('comm-req-id').value;
@@ -751,29 +649,50 @@
       const date = document.getElementById('comm-date').value.trim();
       const scope = document.getElementById('comm-scope').value.trim();
       const fee = document.getElementById('comm-fee').value.trim();
+      const phone = document.getElementById('comm-phone').value.trim();
 
-      if (!companyName || !rep || !address || !period || !date || !scope || !fee) {
-        return alert("請填寫所有委任書必填欄位！");
+      if (!companyName || !rep || !address || !period || !date || !scope || !fee || !phone) {
+        return alert("請填寫所有委任書 8 項必填欄位！");
       }
 
       const btn = document.getElementById('btn-generate-comm');
-      const resDiv = document.getElementById('comm-result');
       btn.disabled = true;
-      btn.textContent = "委任書產生中，請稍候...";
-      resDiv.innerHTML = "";
+      btn.textContent = "委任書 PDF 產生中...";
 
       try {
-        const payload = { reqId, companyName, rep, address, period, date, scope, fee };
-        const result = await apiCall('generateCommissionContract', payload); // res.data 解包已在 apiCall 中處理
+        // 1. 同步資料到後端 (只送 reqId, address, date, 及用來建檔的 companyName, rep)
+        const payload = { reqId, address, date, companyName, rep };
+        await apiCall('generateCommissionContract', payload); // 會回傳 _rowId，確保寫入第 10、11 欄
+
+        // 2. 準備 PDF DOM 替換
+        document.getElementById('tpl-period').textContent = period;
+        document.getElementById('tpl-scope').textContent = scope;
+        document.getElementById('tpl-fee').textContent = fee;
+        document.getElementById('tpl-company').textContent = companyName;
+        document.getElementById('tpl-rep').textContent = rep;
+        document.getElementById('tpl-address').textContent = address;
+        document.getElementById('tpl-phone').textContent = phone;
+        document.getElementById('tpl-date').textContent = date;
+
+        const element = document.getElementById('contract-content');
         
-        resDiv.innerHTML = `✅ 委任書已成功產生！<br><a href="${result.docUrl}" target="_blank" style="color:#0056b3; font-weight:bold; text-decoration:underline; display:inline-block; margin-top:8px;">📄 點擊開啟委任書</a>`;
-        alert("委任書已成功產生！");
+        // 3. 呼叫 html2pdf 進行純前端下載
+        const opt = {
+          margin:       15,
+          filename:     `帳務代理委任書-${companyName}.pdf`,
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true },
+          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        await html2pdf().set(opt).from(element).save();
+
+        alert("委任書 PDF 已成功下載並存檔！");
       } catch (err) {
         alert(`產生失敗：${err.message}`);
-        resDiv.innerHTML = `<span style="color:#dc3545; font-weight:bold;">產生失敗：${err.message}</span>`;
       } finally {
         btn.disabled = false;
-        btn.textContent = "產生委任書";
+        btn.textContent = "產生委任書 PDF";
       }
     }
 
@@ -886,7 +805,7 @@
       const companyName = document.getElementById('sign-company-name').value.trim() || clientName;
       const phone = document.getElementById('sign-phone').value.trim();
       
-      if(!quoteId) return alert("請帶入或填寫報價單號");
+      if(!quoteId) return alert("請帶入或填寫單號");
       if(!clientName || !phone) return alert("請填寫姓名與手機號碼");
       
       const blankCanvas = document.createElement('canvas');
@@ -963,10 +882,9 @@
       document.getElementById('review-sign-id').value = item.signId;
       
       document.getElementById('review-original-info').innerHTML = `
-        <strong>報價單號:</strong> ${escapeHtml(item.quoteId)}<br>
+        <strong>案件單號:</strong> ${escapeHtml(item.quoteId)}<br>
         <strong>客戶姓名:</strong> ${escapeHtml(item.clientName)}<br>
         <strong>公司名稱:</strong> ${escapeHtml(item.companyName)}<br>
-        <strong>原始報價金額:</strong> NT$ ${Number(item.finalPrice).toLocaleString()}
       `;
       
       document.getElementById('review-pdf-link').href = item.contractPdfUrl;
@@ -987,7 +905,7 @@
       if (!currentReviewItem) return;
       const btn = document.getElementById('btn-approve-stamp');
       btn.disabled = true;
-      btn.textContent = "AI 比對金額與歸檔中...";
+      btn.textContent = "AI 比對歸檔中...";
 
       try {
         const payload = {
@@ -995,7 +913,6 @@
           quoteId: currentReviewItem.quoteId,
           clientName: currentReviewItem.clientName,
           companyName: currentReviewItem.companyName,
-          originalPrice: currentReviewItem.finalPrice,
           contractPdfUrl: currentReviewItem.contractPdfUrl
         };
         
@@ -1163,7 +1080,6 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       updateNetworkStatus();
-      restoreDraftFromLocalStorage();
       loadRequirements();
       initCanvas();
     });
