@@ -304,6 +304,7 @@
         </div>
       </div>
 
+      <!-- 📝 行動報價單快速生成區 -->
       <div class="card" id="quote-draft-section">
         <h3 style="margin-top: 0; font-size: 16px; font-weight: 700; margin-bottom: 12px;">📝 行動報價單快速生成區</h3>
         <input type="hidden" id="draft-req-id">
@@ -335,6 +336,43 @@
         <button class="btn-generate-pdf" id="btn-generate-pdf" onclick="handleGenerateQuotePDF()">產生 PDF 報價單並發送</button>
         <div id="draft-status" style="font-size: 12px; color: #888888; text-align:center; margin-top:10px;">表單異動已自動同步至 LocalStorage</div>
       </div>
+
+      <!-- 📄 產生代理稅務申報委任書區塊 (新增) -->
+      <div class="card" id="commission-doc-section">
+        <h3 style="margin-top: 0; font-size: 16px; font-weight: 700; margin-bottom: 12px;">📄 產生代理稅務申報委任書</h3>
+        <input type="hidden" id="comm-req-id">
+        <div class="form-group">
+          <label>公司名稱</label>
+          <input type="text" id="comm-company" class="form-input" placeholder="公司名稱">
+        </div>
+        <div class="form-group">
+          <label>代表人</label>
+          <input type="text" id="comm-rep" class="form-input" placeholder="代表人姓名">
+        </div>
+        <div class="form-group">
+          <label>地址</label>
+          <input type="text" id="comm-address" class="form-input" placeholder="公司地址">
+        </div>
+        <div class="form-group">
+          <label>委任期間</label>
+          <input type="text" id="comm-period" class="form-input" placeholder="例如：113年1月1日至113年12月31日">
+        </div>
+        <div class="form-group">
+          <label>日期 (委任起算日)</label>
+          <input type="text" id="comm-date" class="form-input" placeholder="例如：113年1月1日">
+        </div>
+        <div class="form-group">
+          <label>委任範圍</label>
+          <input type="text" id="comm-scope" class="form-input" value="工商登記與帳務代理">
+        </div>
+        <div class="form-group">
+          <label>酬金</label>
+          <input type="text" id="comm-fee" class="form-input" placeholder="例如：每月 3,000 元">
+        </div>
+        <button class="btn-generate-pdf" id="btn-generate-comm" onclick="handleGenerateCommission()">產生委任書</button>
+        <div id="comm-result" style="margin-top:12px; font-size:14px; text-align:center;"></div>
+      </div>
+
     </div>
 
     <!-- ==================== 02 簽署與覆核 ==================== -->
@@ -589,6 +627,7 @@
     }
 
     function importToQuoteDraft(item) {
+      // 帶入報價單區塊
       document.getElementById('draft-req-id').value = item.reqId || '';
       document.getElementById('draft-customer-name').value = item.customerName || '';
       document.getElementById('draft-company-name').value = item.companyName || '';
@@ -601,6 +640,11 @@
       document.getElementById('calc-discount').value = 0;
       calculateTotal();
       document.getElementById('quote-draft-section').scrollIntoView({ behavior: 'smooth' });
+
+      // 同時預先帶入委任書區塊欄位
+      document.getElementById('comm-req-id').value = item.reqId || '';
+      document.getElementById('comm-company').value = item.companyName || '';
+      document.getElementById('comm-rep').value = item.customerName || '';
     }
 
     function addServiceRow(name = '', price = 0) {
@@ -692,6 +736,44 @@
         calculateTotal();
       } catch (err) { alert(`生成失敗：${err.message}`); } finally {
         btn.disabled = false; btn.textContent = "產生 PDF 報價單並發送";
+      }
+    }
+
+    // ----------------------------------------------------
+    // 新增：產生代理稅務申報委任書邏輯
+    // ----------------------------------------------------
+    async function handleGenerateCommission() {
+      const reqId = document.getElementById('comm-req-id').value;
+      const companyName = document.getElementById('comm-company').value.trim();
+      const rep = document.getElementById('comm-rep').value.trim();
+      const address = document.getElementById('comm-address').value.trim();
+      const period = document.getElementById('comm-period').value.trim();
+      const date = document.getElementById('comm-date').value.trim();
+      const scope = document.getElementById('comm-scope').value.trim();
+      const fee = document.getElementById('comm-fee').value.trim();
+
+      if (!companyName || !rep || !address || !period || !date || !scope || !fee) {
+        return alert("請填寫所有委任書必填欄位！");
+      }
+
+      const btn = document.getElementById('btn-generate-comm');
+      const resDiv = document.getElementById('comm-result');
+      btn.disabled = true;
+      btn.textContent = "委任書產生中，請稍候...";
+      resDiv.innerHTML = "";
+
+      try {
+        const payload = { reqId, companyName, rep, address, period, date, scope, fee };
+        const result = await apiCall('generateCommissionContract', payload); // res.data 解包已在 apiCall 中處理
+        
+        resDiv.innerHTML = `✅ 委任書已成功產生！<br><a href="${result.docUrl}" target="_blank" style="color:#0056b3; font-weight:bold; text-decoration:underline; display:inline-block; margin-top:8px;">📄 點擊開啟委任書</a>`;
+        alert("委任書已成功產生！");
+      } catch (err) {
+        alert(`產生失敗：${err.message}`);
+        resDiv.innerHTML = `<span style="color:#dc3545; font-weight:bold;">產生失敗：${err.message}</span>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "產生委任書";
       }
     }
 
