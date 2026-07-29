@@ -84,7 +84,7 @@
 
     /* A4 預覽區塊 (直接顯示於底部) */
     .a4-container-wrapper { overflow-x: auto; background: #E5E5E5; padding: 20px; border-radius: 8px; margin-top: 16px; }
-    .a4-container { background: #fff; width: 210mm; min-height: 297mm; padding: 20mm; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 0 auto; text-align: left; color: #000; line-height: 1.8; font-size: 15px; }
+    .a4-container { background: #fff; width: 210mm; min-height: 297mm; padding: 25mm 20mm; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 0 auto; text-align: left; color: #000; line-height: 1.8; font-size: 15px; }
 
     .archive-header-row { display: flex; gap: 8px; margin-bottom: 16px; }
     .badge-success { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; font-size: 11px; padding: 2px 6px; border-radius: 12px; font-weight: 600; }
@@ -102,7 +102,7 @@
 </head>
 <body>
 
-  <!-- AI 退件專屬 Modal -->
+  <!-- AI 退件專屬 Modal (保留結構) -->
   <div id="ai-reject-modal" class="modal-overlay">
     <div class="modal-box modal-box-reject">
       <h3 style="color:#EF4444; margin-top:0; font-size:18px;">⚠️ 簽名品質未達標</h3>
@@ -210,7 +210,6 @@
           <input type="text" id="comm-date" class="form-input" placeholder="例：中華民國115年8月1日">
         </div>
 
-        <!-- 新增酬金備註 -->
         <div class="form-group" style="margin-top: 16px;">
           <label>四、酬金備註 (可編輯，預設自動帶入)</label>
           <textarea id="comm-fee-remark" class="form-input" rows="2">任何調整記帳費用時，由雙方重新議定之。</textarea>
@@ -239,47 +238,30 @@
           </div>
         </div>
 
-        <div style="display: flex; gap: 10px; margin-top: 20px;">
-          <button class="btn-secondary" style="flex:1; height: 48px; font-size: 14px; font-weight:bold;" id="btn-save-draft" onclick="handleSaveDraft()">💾 儲存草稿</button>
-          <button class="btn-primary" style="flex:2; height: 48px; font-size: 14px; background-color: #2563eb;" id="btn-preview-comm" onclick="updateA4Preview()">🔍 產出與更新預覽畫面</button>
+        <div style="margin-top: 20px;">
+          <button class="btn-secondary" style="width:100%; height: 48px; font-size: 14px; font-weight:bold;" id="btn-save-draft" onclick="handleSaveDraft()">💾 儲存草稿</button>
         </div>
       </div>
 
-      <!-- 現場線上簽署區 -->
+      <!-- 現場線上簽署區 (極簡化版) -->
       <div class="card">
-        <h3 style="margin-top: 0;">✍️ 現場線上簽署區</h3>
-        
-        <div class="form-group">
-          <label>客戶正楷姓名</label>
-          <input type="text" id="sign-client-name" class="form-input" placeholder="請輸入姓名與同意意願">
-        </div>
-        <div class="form-group">
-          <label>公司名稱 (歸檔建檔用)</label>
-          <input type="text" id="sign-company-name" class="form-input" placeholder="請輸入公司名稱 (若為個人請填姓名)">
-        </div>
-        <div class="form-group">
-          <label>手機號碼 (用於簡訊驗證)</label>
-          <div style="display:flex; gap:8px;">
-            <input type="tel" id="sign-phone" class="form-input" placeholder="09XX-XXX-XXX" style="flex: 2;">
-            <button class="btn-secondary" style="flex: 1;" onclick="sendVerifyCode()">發送驗證碼</button>
-          </div>
-        </div>
+        <h3 style="margin-top: 0;">✍️ 線上簽署與預覽區</h3>
         
         <div class="form-group" style="margin-top: 16px;">
-          <button class="btn-secondary" style="width:100%; height:42px; border:2px dashed #111;" onclick="openSignatureModal()">✍️ 點擊開啟簽名板</button>
+          <button class="btn-secondary" style="width:100%; height:48px; border:2px dashed #111; font-weight:bold;" onclick="openSignatureModal()">✍️ 點擊開啟簽名板</button>
           
           <div id="signature-preview-container" style="display:none; margin-top:12px; text-align:center;">
-            <p style="font-size:12px; color:#888; text-align:left; margin-bottom:4px;">簽名預覽：</p>
+            <p style="font-size:12px; color:#888; text-align:left; margin-bottom:4px;">簽名結果：</p>
             <img id="signature-preview-img" src="" style="max-height:100px; border:1px solid #E5E5E5; border-radius:4px; padding:4px;">
           </div>
         </div>
         
         <div style="margin-top: 16px;">
-          <button class="btn-primary" style="width:100%;" id="btn-submit-sign" onclick="submitSignature()">✅ 確認同意並送出簽署</button>
+          <button class="btn-primary" style="width:100%; background-color:#2563eb; height: 48px; font-size: 14px;" id="btn-preview-comm" onclick="updateA4Preview()">🔍 預覽委任書 (含簽名)</button>
         </div>
       </div>
 
-      <!-- PDF A4 預覽區塊 (直接在下方顯示) -->
+      <!-- PDF A4 預覽區塊 (高度排版公版) -->
       <div class="card" id="a4-inline-preview-card" style="display:none; padding:0; overflow:hidden;">
         <div style="background:#111; color:#fff; padding:12px 16px; display:flex; justify-content:space-between; align-items:center;">
           <h3 style="margin:0; font-size:15px;">📄 委任書 A4 預覽與下載</h3>
@@ -290,36 +272,71 @@
           <div id="a4-preview-content" class="a4-container">
             <!-- 最上方放大居中顯示公司名稱 -->
             <h1 id="tpl-top-company" style="text-align: center; font-size: 26px; margin-top: 0; margin-bottom: 20px;"></h1>
-            <h2 style="text-align: center; margin-bottom: 30px; font-size: 22px;">代理稅務申報委任書</h2>
+            <h2 style="text-align: center; margin-bottom: 30px; font-size: 22px; letter-spacing: 2px;">代理稅務申報委任書</h2>
             
             <p>茲委任 智嵂會計師事務所 為本公司代理稅務申報相關事宜，約定條款如下：</p>
             <p>一、委任期間：<span id="tpl-period" style="font-weight:bold;"></span>，至以後解除委任關係時終止(雙方均得隨時解除委任)。</p>
             
             <div style="margin: 15px 0;">
               <p style="margin:0;">二、委任範圍：</p>
-              <ul id="tpl-dynamic-items" style="margin-top: 5px; padding-left: 24px;"></ul>
+              <ul id="tpl-dynamic-items" style="margin-top: 5px; padding-left: 24px; list-style-type: none;"></ul>
             </div>
 
             <p>三、辦理程度：依據「所得稅法」、「加值型及非加值型營業稅法」及其他有關法令規定，就委任人所提供之憑證資料代為處理相關申報，以供稽徵機關查核。</p>
-            <p>四、酬&nbsp;&nbsp;&nbsp;&nbsp;金：詳見上方委任範圍所列。<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="tpl-fee-remark"></span></p>
+            <p>四、酬&nbsp;&nbsp;&nbsp;&nbsp;金：<span id="tpl-fee-remark"></span></p>
             <p>五、其他約定事項：</p>
             <div id="tpl-article5" style="padding-left: 24px; margin-top: 5px; margin-bottom: 30px;"></div>
 
             <!-- 底部精準渲染簽署區 -->
-            <div style="margin-top: 40px;">
-              <p style="margin: 5px 0;">委&nbsp;&nbsp;任&nbsp;&nbsp;人：<span id="tpl-company" style="font-weight:bold;"></span></p>
-              <p style="margin: 5px 0;">代&nbsp;&nbsp;表&nbsp;&nbsp;人：<span id="tpl-rep" style="font-weight:bold;"></span></p>
-              <p style="margin: 5px 0;">地&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;址：<span id="tpl-address" style="font-weight:bold;"></span></p>
+            <div style="margin-top: 40px; line-height: 2;">
+              <p style="margin: 0;">委&nbsp;&nbsp;任&nbsp;&nbsp;人：<span id="tpl-company" style="font-weight:bold;"></span></p>
+              <p style="margin: 0;">代&nbsp;&nbsp;表&nbsp;&nbsp;人：<span id="tpl-rep" style="font-weight:bold;"></span></p>
+              <p style="margin: 0;">地&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;址：<span id="tpl-address" style="font-weight:bold;"></span></p>
+              
+              <!-- 簽名檔精準嵌入位置 -->
+              <div id="tpl-signature-wrapper" style="display:none; margin-top: 10px;">
+                <img id="tpl-signature" src="" style="max-height: 80px; mix-blend-mode: multiply;">
+              </div>
               <br>
-              <p style="margin: 5px 0;">受&nbsp;&nbsp;任&nbsp;&nbsp;人：智嵂會計師事務所</p>
-              <p style="margin: 5px 0;">事務所地址：台中市西區忠明南路237號12樓之2</p>
-              <p style="margin: 5px 0;">電&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;話：<span id="tpl-phone" style="font-weight:bold;"></span></p>
+
+              <p style="margin: 0;">受&nbsp;&nbsp;任&nbsp;&nbsp;人：智嵂會計師事務所</p>
+              <p style="margin: 0;">事務所地址：台中市西區忠明南路237號12樓之2</p>
+              <p style="margin: 0;">電&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;話：<span id="tpl-phone" style="font-weight:bold;"></span></p>
               
               <p style="margin-top: 40px; font-weight:bold;"><span id="tpl-date"></span></p>
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- 新增：寄發 Email 區塊 (搭配預覽區塊一併顯示) -->
+      <div class="card" id="email-section" style="display:none; margin-top: 16px; border: 1px solid #2563eb;">
+        <h3 style="margin-top: 0; color: #2563eb;">📧 寄發 Email (AI 特助)</h3>
+        
+        <div class="form-group">
+          <label>收件人 Email</label>
+          <input type="email" id="email-to" class="form-input" placeholder="請輸入客戶電子信箱">
+        </div>
+        <div class="form-group">
+          <label>寄件人</label>
+          <input type="text" class="form-input" value="zhiluchenrenyi@gmail.com" readonly disabled style="background-color: #f1f1f1; color: #666;">
+        </div>
+        <div class="form-group">
+          <label>主旨</label>
+          <input type="text" id="email-subject" class="form-input" placeholder="例如：代理稅務申報委任報價單 - {公司名稱}">
+        </div>
+        <div class="form-group">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label>信件內容</label>
+            <button class="btn-secondary" id="btn-ai-email" style="font-size: 11px; border-color: #2563eb; color: #2563eb;" onclick="generateEmailDraft()">✨ AI 幫我撰寫專業內容</button>
+          </div>
+          <textarea id="email-body" class="form-input" rows="8" placeholder="信件內文..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>夾帶檔案 (可多選 PDF 檔案上傳)</label>
+          <input type="file" id="email-attachments" multiple class="form-input" accept="application/pdf,image/*">
+        </div>
+        <button class="btn-primary" id="btn-send-email" onclick="sendEmailAction()" style="width:100%; margin-top:12px; background-color: #2563eb;">🚀 夾帶檔案並發送 Email</button>
       </div>
 
     </div>
@@ -506,7 +523,7 @@
         date: document.getElementById('comm-date').value.trim(),
         phone: document.getElementById('comm-phone').value.trim(),
         article5: document.getElementById('comm-article5').value.trim(),
-        feeRemark: document.getElementById('comm-fee-remark').value.trim(), // 第 45 欄
+        feeRemark: document.getElementById('comm-fee-remark').value.trim(),
         items: items
       };
     }
@@ -540,13 +557,13 @@
       if(!hasValidItem) return alert("請填寫委任項目內容！");
 
       // 準備 PDF DOM 替換
-      document.getElementById('tpl-top-company').textContent = data.companyName; // 最上方放大
-      document.getElementById('tpl-period').textContent = data.period;
-      document.getElementById('tpl-company').textContent = data.companyName;
-      document.getElementById('tpl-rep').textContent = data.rep;
-      document.getElementById('tpl-address').textContent = data.address;
-      document.getElementById('tpl-phone').textContent = data.phone;
-      document.getElementById('tpl-date').textContent = data.date;
+      document.getElementById('tpl-top-company').textContent = data.companyName; 
+      document.getElementById('tpl-period').textContent = `【${data.period}】`;
+      document.getElementById('tpl-company').textContent = `【${data.companyName}】`;
+      document.getElementById('tpl-rep').textContent = `【${data.rep}】`;
+      document.getElementById('tpl-address').textContent = `【${data.address}】`;
+      document.getElementById('tpl-phone').textContent = `【${data.phone}】`;
+      document.getElementById('tpl-date').textContent = `【${data.date}】`;
       
       // 處理條款多行換行
       document.getElementById('tpl-fee-remark').innerHTML = escapeHtml(data.feeRemark).replace(/\n/g, '<br>');
@@ -557,13 +574,31 @@
       ul.innerHTML = '';
       data.items.forEach(item => {
         if(item.scope || item.fee) {
-          ul.innerHTML += `<li style="margin-bottom: 8px;">${escapeHtml(item.scope)} (酬金：${escapeHtml(item.fee)})</li>`;
+          ul.innerHTML += `<li style="margin-bottom: 8px;">【${escapeHtml(item.scope)}】 (酬金：【${escapeHtml(item.fee)}】)</li>`;
         }
       });
 
-      // 顯示並捲動至底部 Inline 預覽區塊
+      // 判定並帶入簽名圖檔
+      const previewImg = document.getElementById('signature-preview-img');
+      const sigWrapper = document.getElementById('tpl-signature-wrapper');
+      const tplSig = document.getElementById('tpl-signature');
+      
+      if (previewImg.src && previewImg.src.indexOf('data:image') !== -1) {
+        tplSig.src = previewImg.src;
+        sigWrapper.style.display = 'block';
+      } else {
+        tplSig.src = '';
+        sigWrapper.style.display = 'none';
+      }
+
+      // 預填 Email 欄位主旨
+      document.getElementById('email-subject').value = `代理稅務申報委任報價單 - ${data.companyName}`;
+
+      // 顯示並捲動至底部 Inline 預覽區塊及 Email 發送區塊
       const previewCard = document.getElementById('a4-inline-preview-card');
+      const emailCard = document.getElementById('email-section');
       previewCard.style.display = 'block';
+      emailCard.style.display = 'block';
       previewCard.scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -581,7 +616,7 @@
         // 呼叫 html2pdf 進行純前端下載
         const element = document.getElementById('a4-preview-content');
         const opt = {
-          margin:       0, // 設為 0 以繼承 .a4-container 的 20mm padding
+          margin:       0, // 設為 0 以繼承 .a4-container 的 padding
           filename:     `代理帳務委任書-${data.companyName}.pdf`,
           image:        { type: 'jpeg', quality: 1 },
           html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
@@ -594,6 +629,63 @@
         alert(`產生失敗：${err.message}`);
       } finally {
         btn.disabled = false; btn.textContent = "📥 確認無誤，下載 PDF";
+      }
+    }
+
+    // ----------------------------------------------------
+    // AI 撰寫 Email 與 夾帶發送邏輯
+    // ----------------------------------------------------
+    async function generateEmailDraft() {
+      const data = getCommFormData();
+      if(!data.companyName) return alert("請先填寫公司名稱等基本資訊。");
+      
+      const btn = document.getElementById('btn-ai-email');
+      btn.disabled = true; btn.textContent = "AI 撰寫中...";
+      
+      try {
+        const res = await apiCall('generateEmailContent', data);
+        document.getElementById('email-body').value = res.emailBody;
+      } catch (err) {
+        alert("產生失敗：" + err.message);
+      } finally {
+        btn.disabled = false; btn.textContent = "✨ AI 幫我撰寫專業內容";
+      }
+    }
+
+    async function sendEmailAction() {
+      const toEmail = document.getElementById('email-to').value.trim();
+      const subject = document.getElementById('email-subject').value.trim();
+      const body = document.getElementById('email-body').value.trim();
+      const reqId = document.getElementById('comm-req-id').value;
+      const rowId = document.getElementById('comm-row-id').value;
+      const fileInput = document.getElementById('email-attachments');
+
+      if(!toEmail || !subject || !body) return alert("請填寫收件人、主旨與信件內容！");
+
+      const btn = document.getElementById('btn-send-email');
+      btn.disabled = true; btn.textContent = "附件轉檔與發送中...";
+
+      try {
+        const attachments = [];
+        for (let i = 0; i < fileInput.files.length; i++) {
+          const file = fileInput.files[i];
+          const base64 = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result.split(',')[1]);
+            reader.readAsDataURL(file);
+          });
+          attachments.push({ fileName: file.name, mimeType: file.type, base64: base64 });
+        }
+
+        const payload = { _rowId: rowId, reqId: reqId, toEmail, subject, body, attachments };
+        await apiCall('sendQuoteEmail', payload);
+        
+        alert("✅ Email 發送成功！客戶標籤已更新為「已傳送報價」。");
+        fileInput.value = ""; // 清空檔案
+      } catch (err) {
+        alert("發送失敗：" + err.message);
+      } finally {
+        btn.disabled = false; btn.textContent = "🚀 夾帶檔案並發送 Email";
       }
     }
 
@@ -632,6 +724,7 @@
         const tagsHtml = (item.serviceItems || []).map(tag => `<span class="tag-item">${escapeHtml(tag)}</span>`).join('');
         let statusBadge = '';
         if(item.status === '建檔中') statusBadge = '<span class="badge-draft">建檔中</span>';
+        else if(item.status === '已傳送報價') statusBadge = '<span class="badge-success" style="background:#dbeafe; color:#1e40af; border-color:#bfdbfe;">已傳送報價</span>';
         else if(item.status === '客戶已回簽') statusBadge = '<span class="badge-success">客戶已回簽</span>';
         else statusBadge = `<span class="badge-draft">${escapeHtml(item.status)}</span>`;
 
@@ -672,11 +765,9 @@
     }
 
     function reverseEditForm(item) {
-      // 1. 切換至 01 區
       switchTab('tab1');
       document.getElementById('commission-doc-section').scrollIntoView({ behavior: 'smooth' });
 
-      // 2. 帶入基礎欄位 (因後端使用 getDisplayValues，此處字首 0 皆完美保留)
       document.getElementById('comm-req-id').value = item.reqId || '';
       document.getElementById('comm-row-id').value = item._rowId || '';
       document.getElementById('comm-company').value = item.companyName || '';
@@ -689,7 +780,6 @@
       if(item.article5) document.getElementById('comm-article5').value = item.article5;
       if(item.feeRemark) document.getElementById('comm-fee-remark').value = item.feeRemark;
 
-      // 3. 重建動態項目
       clearCommDynamicItems();
       if(item.items && item.items.length > 0) {
         item.items.forEach(i => { addCommDynamicItem(i.scope, i.fee, i.note); });
@@ -697,8 +787,8 @@
         addCommDynamicItem();
       }
       
-      // 隱藏舊的預覽
       document.getElementById('a4-inline-preview-card').style.display = 'none';
+      document.getElementById('email-section').style.display = 'none';
     }
 
     async function uploadSignedContract(rowId, reqId) {
@@ -786,42 +876,8 @@
       closeSignatureModal();
     }
 
-    function sendVerifyCode() {
-      const phone = document.getElementById('sign-phone').value;
-      if(!phone) return alert("請先填寫手機號碼");
-      alert(`已發送模擬簡訊驗證碼至 ${phone}！\n(此為展示功能)`);
-    }
-
-    async function submitSignature() {
-      const quoteId = document.getElementById('comm-req-id').value.trim(); // 綁定草稿的單號
-      const clientName = document.getElementById('sign-client-name').value.trim();
-      const companyName = document.getElementById('sign-company-name').value.trim() || clientName;
-      const phone = document.getElementById('sign-phone').value.trim();
-      const previewImg = document.getElementById('signature-preview-img');
-      
-      if(!quoteId) return alert("請先在上方『儲存草稿』產生單號後，再進行簽署！");
-      if(!clientName || !phone) return alert("請填寫姓名與手機號碼");
-      if(!previewImg.src || previewImg.src.indexOf('data:image') === -1) return alert("請先點擊電子簽名按鈕完成簽章！");
-
-      const signatureBase64 = previewImg.src; 
-      const btn = document.getElementById('btn-submit-sign');
-      btn.disabled = true; btn.textContent = "AI 防偽鑑識與存檔中...";
-
-      try {
-        const payload = { quoteId, clientName, companyName, phone, signatureBase64 };
-        await apiCall('saveClientSignature', payload);
-        alert(`✅ 簽署完成！\n簽署紀錄已存檔。`);
-        previewImg.src = "";
-        document.getElementById('signature-preview-container').style.display = 'none';
-        clearSignature(); 
-      } catch(err) {
-        if (err.message.includes('AI防偽檢驗未通過')) showAiModal(err.message);
-        else alert("簽署提交失敗：" + err.message);
-      } finally { btn.disabled = false; btn.textContent = "✅ 確認同意並送出簽署"; }
-    }
-
     // ----------------------------------------------------
-    // 階段八/九/十：雲端歸檔、智慧摘要、多通道派發與 Log 追蹤 (保留於 02 區下半部)
+    // 雲端歸檔、智慧摘要、多通道派發與 Log 追蹤
     // ----------------------------------------------------
     let allArchives = [];
 
