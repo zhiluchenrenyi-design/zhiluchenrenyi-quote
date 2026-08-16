@@ -31,12 +31,22 @@
     
     /* 客戶唯讀視圖 */
     #client-view { display: none; padding: 20px 10px; background-color: #E2E8F0; min-height: 100vh; }
-    .a4-paper { background: #FFFFFF; max-width: 800px; margin: 0 auto; border-radius: 8px; padding: 30px; font-size: 15px; line-height: 1.8; white-space: pre-wrap; }
-    .a4-paper h1 { text-align: center; font-size: 22px; margin-bottom: 30px; border-bottom: 2px solid #E2E8F0; padding-bottom: 10px; }
+    .a4-paper { background: #FFFFFF; max-width: 800px; margin: 0 auto; border-radius: 8px; padding: 40px; font-size: 15px; line-height: 1.8; white-space: pre-wrap; color: #000; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    .a4-paper h1 { text-align: center; font-size: 22px; margin-bottom: 30px; }
     
-    .signature-pad-wrapper { border: 1px solid #CBD5E0; border-radius: 8px; background: #F8FAFC; position: relative; touch-action: none; margin-bottom: 16px; }
-    #client-signature-pad { width: 100%; height: 200px; cursor: crosshair; }
+    .signature-section { margin-top: 40px; border-top: 1px solid #000; padding-top: 20px; white-space: normal; }
+    .sign-row { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: flex-start; }
+    .sign-block { width: 45%; }
+    .sign-block p { margin: 4px 0; font-size: 14px; }
+    
+    .signature-pad-wrapper { border: 1px dashed #CBD5E0; border-radius: 4px; background: #fafafa; position: relative; touch-action: none; margin-top: 10px; }
+    #client-signature-pad { width: 100%; height: 150px; cursor: crosshair; }
+    
+    /* 印章模擬 */
+    .stamp-box { border: 2px solid red; color: red; width: 100px; height: 100px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; text-align: center; opacity: 0.8; margin-top: 10px; }
+
     .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    .search-box { width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 6px; margin-bottom: 16px; }
     
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   </style>
@@ -45,21 +55,48 @@
   <script> const URL_REQ_ID = "<?= clientReqId ?>"; </script>
 
   <!-- ========================================== -->
-  <!-- 客戶線上簽署視圖 (純唯讀 HTML) -->
+  <!-- 客戶線上簽署視圖 (完美模擬 A4 紙本) -->
   <!-- ========================================== -->
   <div id="client-view">
     <div class="a4-paper">
       <h1 id="cv-title">載入合約中...</h1>
       <div id="cv-contract-content" style="display:none; animation: fadeIn 0.5s;">
         <div id="cv-text-body"></div>
-        <div style="margin-top: 30px; border-top: 2px dashed #E2E8F0; padding-top: 20px;">
-          <h3 style="margin-top: 0;">✍️ 委任方 (客戶) 線上簽署區</h3>
-          <p style="font-size: 13px; color: #718096;">茲同意本函所述各點，請在下方簽名：</p>
-          <div class="signature-pad-wrapper">
-            <button onclick="clearClientSignature()" style="position:absolute; top:10px; right:10px; font-size:12px; padding:4px 8px;">🗑️ 清除重簽</button>
-            <canvas id="client-signature-pad"></canvas>
+        
+        <!-- 完美的實體合約結尾對齊 -->
+        <div class="signature-section">
+          <p style="text-align: center; margin-bottom: 30px;">茲同意本函所述各點，特簽還壹份。<br>此 致<br>智嵂會計師事務所 陳仁易 會計師</p>
+          
+          <div class="sign-row">
+            <!-- 委任人區塊 -->
+            <div class="sign-block">
+              <p><b>委 任 人：</b><span id="cv-company"></span></p>
+              <p><b>代 表 人：</b><span id="cv-rep"></span></p>
+              <p><b>地  址：</b><span id="cv-address"></span></p>
+              <p><b>電  話：</b><span id="cv-phone"></span></p>
+              
+              <!-- 簽名板 -->
+              <p style="margin-top:15px; color:#666; font-size:12px;">※ 請於下方框內簽名：</p>
+              <div class="signature-pad-wrapper">
+                <button onclick="clearClientSignature()" style="position:absolute; top:5px; right:5px; font-size:12px; padding:2px 6px;">清除</button>
+                <canvas id="client-signature-pad"></canvas>
+              </div>
+            </div>
+            
+            <!-- 受任人區塊 (帶入固定資訊與模擬印章) -->
+            <div class="sign-block">
+              <p><b>受 任 人：</b>智嵂會計師事務所 陳仁易 會計師</p>
+              <p><b>事務所地址：</b>台中市西區忠明南路237號12樓之2</p>
+              <p><b>電  話：</b>04-23050265</p>
+              
+              <!-- 這裡是你說的受任人大小章預覽，實體 PDF 會由 Google Doc 範本帶出 -->
+              <div class="stamp-box">智嵂會計師<br>事務所<br>印章</div>
+            </div>
           </div>
-          <button class="btn-primary" id="btn-client-submit" onclick="submitClientContract()">確認簽署並送出</button>
+          
+          <p style="text-align: center; margin-top: 30px; font-weight: bold; font-size: 16px;" id="cv-signdate"></p>
+          
+          <button class="btn-primary" id="btn-client-submit" onclick="submitClientContract()" style="margin-top: 20px;">確認簽署並送出</button>
         </div>
       </div>
       <div id="cv-success-msg" style="display:none; text-align:center; padding: 40px 0;">
@@ -93,18 +130,18 @@
             <div class="form-group" style="flex: 1;"><label>連絡電話</label><input type="text" id="comm-phone" class="form-input"></div>
           </div>
           <div style="display: flex; gap: 8px;">
-            <div class="form-group" style="flex: 1;"><label>委任期間</label><input type="text" id="comm-period" class="form-input" placeholder="例：自 115 年 1 月 01 日至以後解除..."></div>
+            <div class="form-group" style="flex: 1;"><label>委任期間</label><input type="text" id="comm-period" class="form-input" placeholder="例：自 115 年 1 月 01 日起..."></div>
             <div class="form-group" style="flex: 1;"><label>合約簽署日期</label><input type="text" id="comm-sign-date" class="form-input" placeholder="例：中華民國 115 年 08 月 01 日"></div>
           </div>
           
           <!-- 預設合約條文區 -->
           <div class="form-group"><label>主旨</label><textarea id="txt-subject" class="form-input">承 貴公司委任智律會計師事務所（以下簡稱本事務所）辦理公司會計帳務處理、各項稅務之申報相關作業等服務，謹開列下列工作範圍及條件，請查照惠予同意並賜復。</textarea></div>
           <div class="form-group"><label>一、委任方法</label><textarea id="txt-method" class="form-input">本事務所將依據財政部發布之「所得稅法」相關規定，辦理會計帳務處理，並提供有關之諮詢服務。</textarea></div>
-          <div class="form-group"><label>二、工作內容 (自填)</label><textarea id="txt-work-custom" class="form-input" placeholder="請填寫工作內容，可換行..."></textarea></div>
+          <div class="form-group"><label>二、工作內容 (自填，可自由換行)</label><textarea id="txt-work-custom" class="form-input" placeholder="(一) 每年會計帳務處理..."></textarea></div>
           <div class="form-group"><label>二、工作內容 (預設結尾)</label><textarea id="txt-work-default" class="form-input">為順利達成上列工作，貴公司應提供應有之文件、憑證，並答覆有關問題之詢問；每期營業稅申報日截止前十日（即單數月五日以前），貴公司應交付相關憑證供本事務所整理申報。對貴公司所提供之一切資料本事務所均將嚴守秘密，惟當業務事件主管機關依法向本事務所查詢或調閱有關之工作底稿時，本事務所不得拒絕或規避。</textarea></div>
           <div class="form-group"><label>三、酬金及代墊費用 (前綴)</label><textarea id="txt-fee-prefix" class="form-input" rows="2">第二條所列之工作內容之委任酬金如下：</textarea></div>
-          <div class="form-group"><label>三、酬金及代墊費用 (自填)</label><textarea id="txt-fee-custom" class="form-input" placeholder="請填寫酬金內容..."></textarea></div>
-          <div class="form-group"><label>三、酬金及代墊費用 (後綴)</label><textarea id="txt-fee-suffix" class="form-input" rows="5">各項規費、稅金、郵資、交通費、代刻印鑑、代購發票及其他因提供服務而發生之代墊費用，應由貴公司負擔。代墊費用將由本事務所按實際發生金額製據向 貴公司收取，貴公司應於收到本事務所請款單據時，以即期支票、現金或電匯本事務所指定帳戶之方式支付酬金。各項稅金之代繳，貴公司應於該稅金繳納截止日之前一天，連同服務酬金一併支付。本事務所恕不代墊稅金。 委任酬金之調整，視貴公司營業額成長，或委任事務增加或帳務日益繁複時，本事務所得要求調整委任酬金。
+          <div class="form-group"><label>三、酬金及代墊費用 (自填，可自由換行)</label><textarea id="txt-fee-custom" class="form-input" placeholder="(一) 每年各項業務處理費用..."></textarea></div>
+          <div class="form-group"><label>三、酬金及代墊費用 (後綴)</label><textarea id="txt-fee-suffix" class="form-input" rows="5">各項規費、稅金、郵撿、交通費、代刻印鑑、代購發票及其他因提供服務而發生之代墊費用，應由貴公司負擔。代墊費用將由本事務所按實際發生金額製據向 貴公司收取，貴公司應於收到本事務所請款單據時，以即期支票、現金或電匯本事務所指定帳戶之方式支付酬金。各項稅金之代繳，貴公司應於該稅金繳納截止日之前一天，連同服務酬金一併支付。本事務所恕不代墊稅金。 委任酬金之調整，視貴公司營業額成長，或委任事務增加或帳務日益繁複時，本事務所得要求調整委任酬金。
 
 委任酬金之調整，委任事務所可就實際工作內容及帳務繁複程度，本事務所得要求調整委任酬金且須經雙方合意始得進行。</textarea></div>
           <div class="form-group"><label>五、終止委任</label><textarea id="txt-termination" class="form-input" rows="4">(一) 任一方若欲終止委任，應於委任終止前十日以書面方式告知他方。 
@@ -140,17 +177,11 @@
           </div>
           <div class="form-group">
             <label>信件主旨</label>
-            <input type="text" id="email-subject" class="form-input" value="【智嵂會計師事務所】帳務委任書">
+            <input type="text" id="email-subject" class="form-input" value="【智嵂會計師事務所】代理帳務委任書">
           </div>
           <div class="form-group">
-            <label>專業信件內容 (可編輯)</label>
-            <textarea id="email-body" class="form-input" rows="5">您好，
-
-附件為貴公司的帳務委任書與相關參考檔案，請查收。
-若確認合約內容無誤，請點擊下方專屬連結進行線上簽署。
-
-謝謝您。
-智嵂會計師事務所 敬上</textarea>
+            <label>專業信件內容 (AI特助已幫您草擬，可再編輯)</label>
+            <textarea id="email-body" class="form-input" rows="8"></textarea>
           </div>
           <div class="form-group">
             <label>夾帶檔案 (支援多檔上傳)</label>
@@ -171,15 +202,18 @@
       </div>
 
       <!-- ========================================== -->
-      <!-- 02 歸檔與追蹤 -->
+      <!-- 02 歸檔與追蹤 (增加搜尋與時間顯示) -->
       <!-- ========================================== -->
       <div id="tab2" class="tab-content">
         <div class="card">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <h3 style="margin: 0;">需求與建檔時間軸</h3>
             <button class="btn-secondary" style="width:auto;" onclick="loadRequirements()">重新整理</button>
           </div>
-          <div id="timeline-list" style="margin-top:12px; font-size:13px; color:#888;">載入中...</div>
+          <!-- 搜尋框 -->
+          <input type="text" id="search-box" class="search-box" placeholder="輸入公司名稱或單號搜尋..." onkeyup="filterTimeline()">
+          
+          <div id="timeline-list" style="font-size:13px; color:#333;">載入中...</div>
         </div>
       </div>
     </div>
@@ -198,6 +232,7 @@
         initClientSigningView(URL_REQ_ID);
       } else {
         document.getElementById('admin-view').style.display = 'block';
+        updateEmailTemplate(); // 預設載入 Email 範本
       }
     });
 
@@ -207,20 +242,26 @@
       try {
         const data = await apiCall('getContractByReqId', { reqId });
         document.getElementById('cv-title').textContent = `${escapeHtml(data.companyName)} 委任書`;
+        document.getElementById('cv-company').textContent = escapeHtml(data.companyName);
+        document.getElementById('cv-rep').textContent = escapeHtml(data.rep);
+        document.getElementById('cv-address').textContent = escapeHtml(data.address);
+        document.getElementById('cv-phone').textContent = escapeHtml(data.phone);
+        document.getElementById('cv-signdate').textContent = escapeHtml(data.signDate);
+        
         document.getElementById('cv-text-body').innerHTML = `
           <p>主旨：<br>${escapeHtml(data.subject)}</p>
           <p><b>一、委任方法：</b><br>${escapeHtml(data.method)}</p>
-          <p><b>二、【工作內容】：</b><br>${escapeHtml(data.workCustom)}<br><br>${escapeHtml(data.workDefault)}</p>
-          <p><b>三、【酬金及代墊費用】</b><br>${escapeHtml(data.feePrefix)}<br>${escapeHtml(data.feeCustom)}<br><br>${escapeHtml(data.feeSuffix)}</p>
+          <p><b>二、【工作內容】：</b><br>${escapeHtml(data.workCustom).replace(/\n/g, '<br>')}<br><br>${escapeHtml(data.workDefault)}</p>
+          <p><b>三、【酬金及代墊費用】</b><br>${escapeHtml(data.feePrefix)}<br>${escapeHtml(data.feeCustom).replace(/\n/g, '<br>')}<br><br>${escapeHtml(data.feeSuffix).replace(/\n/g, '<br>')}</p>
           <p><b>四、【委任期間】：</b><br>${escapeHtml(data.period)}</p>
-          <p><b>五、終止委任：</b><br>${escapeHtml(data.termination)}</p>
-          <p><b>六、其他約定事項：</b><br>${escapeHtml(data.otherTerms)}</p>
+          <p><b>五、終止委任：</b><br>${escapeHtml(data.termination).replace(/\n/g, '<br>')}</p>
+          <p><b>六、其他約定事項：</b><br>${escapeHtml(data.otherTerms).replace(/\n/g, '<br>')}</p>
         `;
         document.getElementById('cv-contract-content').style.display = 'block';
         
         clientCanvas = document.getElementById('client-signature-pad');
         clientCtx = clientCanvas.getContext('2d');
-        const resize = () => { clientCanvas.width = clientCanvas.parentElement.clientWidth; clientCanvas.height = 200; clientCtx.lineWidth = 3; };
+        const resize = () => { clientCanvas.width = clientCanvas.parentElement.clientWidth; clientCanvas.height = 150; clientCtx.lineWidth = 3; };
         window.addEventListener('resize', resize); resize();
         
         const getPos = (e) => { const rect = clientCanvas.getBoundingClientRect(); let x = e.clientX, y = e.clientY; if(e.touches) { x = e.touches[0].clientX; y = e.touches[0].clientY; } return { x: x - rect.left, y: y - rect.top }; };
@@ -239,6 +280,7 @@
       const blank = document.createElement('canvas'); blank.width = clientCanvas.width; blank.height = clientCanvas.height;
       if(clientCanvas.toDataURL() === blank.toDataURL()) return alert("請先簽名！");
       document.getElementById('btn-client-submit').disabled = true;
+      document.getElementById('btn-client-submit').textContent = "處理中...";
       try {
         await apiCall('clientSubmitSignature', { reqId: URL_REQ_ID, signatureDataUri: clientCanvas.toDataURL() });
         document.getElementById('cv-contract-content').style.display = 'none';
@@ -254,17 +296,22 @@
       if(tabId === 'tab2') loadRequirements();
     }
 
+    // 清除括號的輔助函數
+    function stripBrackets(str) {
+      return (str || '').replace(/【/g, '').replace(/】/g, '').trim();
+    }
+
     function getFormData() {
       return {
         reqId: document.getElementById('comm-req-id').value, 
         _rowId: document.getElementById('comm-row-id').value,
         pdfId: document.getElementById('comm-pdf-id').value,
-        companyName: document.getElementById('comm-company').value.trim(), 
-        rep: document.getElementById('comm-rep').value.trim(), 
-        phone: document.getElementById('comm-phone').value.trim(),
-        address: document.getElementById('comm-address').value.trim(), 
-        period: document.getElementById('comm-period').value.trim(), 
-        signDate: document.getElementById('comm-sign-date').value.trim(),
+        companyName: stripBrackets(document.getElementById('comm-company').value), 
+        rep: stripBrackets(document.getElementById('comm-rep').value), 
+        phone: stripBrackets(document.getElementById('comm-phone').value),
+        address: stripBrackets(document.getElementById('comm-address').value), 
+        period: stripBrackets(document.getElementById('comm-period').value), 
+        signDate: stripBrackets(document.getElementById('comm-sign-date').value),
         subject: document.getElementById('txt-subject').value.trim(), 
         method: document.getElementById('txt-method').value.trim(),
         workCustom: document.getElementById('txt-work-custom').value.trim(), 
@@ -277,11 +324,31 @@
       };
     }
 
-    // 當客戶名稱變更時，自動聯動更新信件主旨
-    document.getElementById('comm-company').addEventListener('input', function(e) {
-      const company = e.target.value.trim() || "客戶";
-      document.getElementById('email-subject').value = `【智嵂會計師事務所】帳務委任書 - ${company}`;
-    });
+    // AI 生成 Email 內容
+    function updateEmailTemplate() {
+      const company = document.getElementById('comm-company').value.trim() || "貴公司";
+      document.getElementById('email-subject').value = `【智嵂會計師事務所】代理帳務委任書 - ${company}`;
+      
+      const emailTemplate = `敬愛的 ${company} 您好，
+
+感謝您對智嵂會計師事務所的信任與支持。
+附件為為您專屬擬定的「代理帳務委任書」及相關參考檔案，敬請查收。
+
+我們已為您準備了便捷的「線上簽署」服務，若您確認合約內容無誤，請直接點擊下方專屬連結，於您的手機或電腦上進行簽署，省去您列印及寄送的繁瑣步驟。
+
+若您對合約內容有任何疑問，歡迎隨時與我們聯繫，我們將竭誠為您服務。
+
+順頌 商祺
+
+智嵂會計師事務所 陳仁易 會計師 敬上
+電話：04-23050265
+地址：台中市西區忠明南路237號12樓之2`;
+      
+      document.getElementById('email-body').value = emailTemplate;
+    }
+
+    // 當客戶名稱變更時，自動更新信件主旨與內容
+    document.getElementById('comm-company').addEventListener('input', updateEmailTemplate);
 
     async function handleSave() {
       const data = getFormData();
@@ -344,7 +411,6 @@
           }));
         }
         
-        // 組合 Email Payload
         data.emailTo = emailTo;
         data.emailSubject = emailSubject;
         data.emailBody = emailBody;
@@ -356,23 +422,48 @@
       finally { btn.disabled = false; btn.textContent = "📤 寄送 Email"; }
     }
 
+    // --- 02區 時間軸與搜尋 ---
+    let allRequirements = [];
     async function loadRequirements() {
       const list = document.getElementById('timeline-list');
       list.innerHTML = '載入中...';
       try {
-        const reqs = await apiCall('getRequirements', {});
-        list.innerHTML = reqs.map(r => `
-          <div style="border-bottom:1px solid #eee; padding:10px;">
-            <b>${escapeHtml(r.companyName)}</b> <span style="color:#666; font-size:12px;">(${r.status})</span><br>
-            單號: ${r.reqId}<br>
-            <a href="#" onclick='loadForm(${JSON.stringify(r).replace(/'/g, "&apos;")})'>✏️ 載入修改</a>
-          </div>
-        `).join('');
+        allRequirements = await apiCall('getRequirements', {});
+        renderTimeline(allRequirements);
       } catch(e) { list.innerHTML = '載入失敗: ' + e.message; }
+    }
+
+    function renderTimeline(data) {
+      const list = document.getElementById('timeline-list');
+      if (data.length === 0) { list.innerHTML = '無資料'; return; }
+      list.innerHTML = data.map(r => `
+        <div class="timeline-item" style="border-bottom:1px solid #eee; padding:12px 0;">
+          <div style="display:flex; justify-content:space-between;">
+            <b style="font-size:15px; color:#2b6cb0;">${escapeHtml(r.companyName)}</b>
+            <span style="background-color:#EDF2F7; padding:2px 8px; border-radius:10px; font-size:12px;">${escapeHtml(r.status)}</span>
+          </div>
+          <div style="color:#718096; font-size:12px; margin-top:4px;">
+            更新時間: ${escapeHtml(r.timeStr)} | 單號: ${escapeHtml(r.reqId)}
+          </div>
+          <div style="margin-top:6px;">
+            <a href="#" style="color:#e53e3e; text-decoration:none; font-weight:bold; font-size:13px;" onclick='loadForm(${JSON.stringify(r).replace(/'/g, "&apos;")})'>✏️ 帶入修改</a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterTimeline() {
+      const keyword = document.getElementById('search-box').value.toLowerCase();
+      const filtered = allRequirements.filter(r => 
+        (r.companyName && r.companyName.toLowerCase().includes(keyword)) ||
+        (r.reqId && r.reqId.toLowerCase().includes(keyword))
+      );
+      renderTimeline(filtered);
     }
 
     function loadForm(item) {
       switchTab('tab1');
+      // 精準欄位還原
       document.getElementById('comm-req-id').value = item.reqId || '';
       document.getElementById('comm-row-id').value = item._rowId || '';
       document.getElementById('comm-company').value = item.companyName || '';
@@ -383,9 +474,7 @@
       document.getElementById('comm-sign-date').value = item.signDate || '';
       document.getElementById('comm-pdf-id').value = item.pdfId || '';
       
-      // 連動 Email 主旨
-      document.getElementById('email-subject').value = `【智嵂會計師事務所】帳務委任書 - ${item.companyName || "客戶"}`;
-      
+      // JSON 展開 (解決載入空白問題)
       try {
         if(item.jsonStr) {
           const t = JSON.parse(item.jsonStr);
@@ -399,9 +488,11 @@
           document.getElementById('txt-termination').value = t.termination || '';
           document.getElementById('txt-other-terms').value = t.otherTerms || '';
         }
-      } catch(e){}
+      } catch(e){ console.error("JSON Parsing Error", e); }
       
+      updateEmailTemplate(); // 更新 Email 範本
       document.getElementById('link-result-container').style.display = 'none';
+      alert("資料已成功帶入至 01 區！");
     }
     
     function escapeHtml(str) { return String(str||'').replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;"); }
