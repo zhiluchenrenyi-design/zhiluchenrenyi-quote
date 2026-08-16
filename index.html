@@ -51,7 +51,7 @@
 </head>
 <body>
 
-  <!-- GAS 傳遞過來的變數 -->
+  <!-- 接收後端 URL 參數，用於判斷是否為客戶簽署模式 -->
   <script>
     const URL_REQ_ID = "<?= clientReqId ?>";
   </script>
@@ -82,7 +82,6 @@
           <p style="margin:0;" id="cv-period"></p>
         </div>
         
-        <!-- 簽署區域 -->
         <div class="signature-area">
           <h3 style="margin-top: 0; color: #2D3748;">✍️ 委任方 (客戶) 線上簽署區</h3>
           <p style="font-size: 13px; color: #718096; margin-bottom: 12px;">請在下方空白處簽下您的姓名：</p>
@@ -94,7 +93,6 @@
         </div>
       </div>
       
-      <!-- 簽署成功畫面 -->
       <div id="cv-success-msg" style="display:none; text-align:center; padding: 40px 0;">
         <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
         <h2 style="color: #28a745; margin-bottom: 8px;">簽署完成！</h2>
@@ -105,7 +103,7 @@
 
 
   <!-- ========================================== -->
-  <!-- 視圖 2：內部管理員系統 (原有系統) -->
+  <!-- 視圖 2：內部管理員系統 -->
   <!-- ========================================== -->
   <div id="admin-view" style="display: none;">
     <nav><h1>智嵂報價特助 (管理後台)</h1></nav>
@@ -118,7 +116,7 @@
       <!-- 01 需求與報價 -->
       <div id="tab1" class="tab-content active">
         <div class="card">
-          <h3 style="margin-top: 0;">📄 代理帳務委任書建檔</h3>
+          <h3 style="margin-top: 0;">📄 代理帳務委任書建檔 (新版)</h3>
           <input type="hidden" id="comm-req-id">
           <input type="hidden" id="comm-row-id">
           
@@ -129,7 +127,7 @@
           <div class="form-group"><label>地址</label><input type="text" id="comm-address" class="form-input"></div>
           <div style="display: flex; gap: 8px;">
             <div class="form-group" style="flex: 1;"><label>電話</label><input type="text" id="comm-phone" class="form-input"></div>
-            <div class="form-group" style="flex: 1;"><label>委任期間</label><input type="text" id="comm-period" class="form-input"></div>
+            <div class="form-group" style="flex: 1;"><label>委任期間</label><input type="text" id="comm-period" class="form-input" placeholder="例：自2026年1月01日至2026年12月31日起"></div>
           </div>
           <div class="form-group" style="margin-top: 8px;"><label>合約書簽署日期</label><input type="date" id="comm-sign-date" class="form-input"></div>
           
@@ -147,7 +145,7 @@
 
         <div class="card">
           <h3 style="margin-top: 0; color:#2b6cb0;">🔗 產生客戶專屬簽署連結</h3>
-          <p style="font-size:12px; color:#718096; margin-bottom:12px;">儲存合約後，點擊下方按鈕產生連結，將連結傳給客戶進行手機簽署。</p>
+          <p style="font-size:12px; color:#718096; margin-bottom:12px;">請先儲存合約後，點擊下方按鈕產生連結，將網址傳給客戶進行手機簽署。</p>
           <button class="btn-secondary" style="width:100%; font-weight:bold; height:42px; color:#2b6cb0; border-color:#2b6cb0;" onclick="generateClientLink()">產生專屬簽署連結</button>
           
           <div id="link-result-container" style="display:none; margin-top:12px; background:#ebf8ff; padding:12px; border-radius:6px; word-break:break-all;">
@@ -157,23 +155,21 @@
         </div>
       </div>
 
-      <!-- 02 歸檔與追蹤 -->
+      <!-- 02 歸檔與追蹤 (純介面，不破壞舊有功能) -->
       <div id="tab2" class="tab-content">
         <div class="card">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <h3 style="margin: 0;">需求與建檔時間軸</h3>
             <button class="btn-secondary" onclick="loadRequirements()">重新整理</button>
           </div>
-          <div id="timeline-list" style="margin-top:12px; font-size:13px; color:#888; text-align:center;">載入中...</div>
+          <div id="timeline-list" style="margin-top:12px; font-size:13px; color:#888; text-align:center;">請點擊重新整理...</div>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // ⚠️ 部署後請務必將此處替換為你的 GAS Web App URL
-    const GAS_WEB_URL = "https://script.google.com/macros/s/AKfycbxKDzJ6CViZhgm75MLXmK9jO_ZM1Smo8Esy3wuj1JfD7PccBj4eNKp3TsLwKElRWmDb/exec";
-
+    // 透過呼叫 GAS 原生環境取得資料
     async function apiCall(action, payload) {
       const requestData = { action: action, payload: payload };
       try {
@@ -181,17 +177,12 @@
           return await new Promise((resolve, reject) => {
             google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).processBackendRouting(requestData); 
           });
-        } else {
-          const response = await fetch(GAS_WEB_URL, { method: 'POST', body: JSON.stringify(requestData) });
-          const res = await response.json();
-          if (res.status !== "success") throw new Error(res.message);
-          return res.data; 
         }
       } catch (error) { throw error; }
     }
 
     /* ========================================================= */
-    /* 核心路由邏輯 */
+    /* 核心路由邏輯 (判斷要顯示客戶簽署頁，還是後台管理頁) */
     /* ========================================================= */
     window.addEventListener('DOMContentLoaded', () => {
       if (URL_REQ_ID && URL_REQ_ID.trim() !== "") {
@@ -250,7 +241,7 @@
       if (clientCanvas.toDataURL() === blank.toDataURL()) return alert("請先在簽名板上簽下您的姓名！");
       
       const btn = document.getElementById('btn-client-submit');
-      btn.disabled = true; btn.textContent = "合約存檔中，請稍候...";
+      btn.disabled = true; btn.textContent = "合約與 PDF 產出中，請稍候...";
       
       try {
         const signatureBase64 = clientCanvas.toDataURL();
@@ -263,7 +254,6 @@
         btn.disabled = false; btn.textContent = "確認簽署並送出合約";
       }
     }
-
 
     /* ========================================================= */
     /* 內部管理員：後台表單邏輯 */
@@ -321,29 +311,21 @@
       finally { btn.disabled = false; btn.textContent = "💾 儲存合約資料"; }
     }
 
+    // 產生專屬客戶連結 (抓取當前 GAS 發布網址)
     function generateClientLink() {
       const reqId = document.getElementById('comm-req-id').value;
       if(!reqId) return alert("請先點擊上方『儲存合約資料』，才能產生客戶連結！");
       
-      let baseUrl = "";
       if (typeof google !== 'undefined' && google.script) {
         google.script.url.getLocation(function(location) {
-           baseUrl = location.href;
-           showLink(baseUrl, reqId);
+           let cleanUrl = location.href.split('?')[0]; 
+           let finalLink = `${cleanUrl}?reqId=${reqId}`;
+           const aTag = document.getElementById('client-link-href');
+           aTag.href = finalLink;
+           aTag.textContent = finalLink;
+           document.getElementById('link-result-container').style.display = 'block';
         });
-      } else {
-        baseUrl = GAS_WEB_URL;
-        showLink(baseUrl, reqId);
       }
-    }
-
-    function showLink(baseUrl, reqId) {
-      let cleanUrl = baseUrl.split('?')[0]; 
-      let finalLink = `${cleanUrl}?reqId=${reqId}`;
-      const aTag = document.getElementById('client-link-href');
-      aTag.href = finalLink;
-      aTag.textContent = finalLink;
-      document.getElementById('link-result-container').style.display = 'block';
     }
 
     async function loadRequirements() {
@@ -351,7 +333,7 @@
       timelineEl.innerHTML = '載入中...';
       try { 
         const reqs = await apiCall('getRequirements', {}); 
-        timelineEl.innerHTML = reqs.length === 0 ? '無資料' : reqs.map(r => `<div style="border-bottom:1px solid #eee; padding:10px; text-align:left;"><b>${r.companyName}</b><br>狀態: ${r.status}<br><a href="javascript:void(0)" onclick='reverseEditForm(${JSON.stringify(r).replace(/'/g, "&apos;")})'>✏️ 載入修改</a></div>`).join('');
+        timelineEl.innerHTML = reqs.length === 0 ? '無資料' : reqs.map(r => `<div style="border-bottom:1px solid #eee; padding:10px; text-align:left;"><b>${r.companyName}</b><br>單號: ${r.reqId}<br>狀態: ${r.status}<br><a href="javascript:void(0)" onclick='reverseEditForm(${JSON.stringify(r).replace(/'/g, "&apos;")})'>✏️ 載入修改</a></div>`).join('');
       } catch (err) { timelineEl.innerHTML = '載入失敗'; }
     }
 
