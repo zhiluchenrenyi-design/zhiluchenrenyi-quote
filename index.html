@@ -51,7 +51,7 @@
 </head>
 <body>
 
-  <!-- 接收後端 URL 參數，用於判斷是否為客戶簽署模式 -->
+  <!-- GAS 傳遞過來的變數 -->
   <script>
     const URL_REQ_ID = "<?= clientReqId ?>";
   </script>
@@ -82,6 +82,7 @@
           <p style="margin:0;" id="cv-period"></p>
         </div>
         
+        <!-- 簽署區域 -->
         <div class="signature-area">
           <h3 style="margin-top: 0; color: #2D3748;">✍️ 委任方 (客戶) 線上簽署區</h3>
           <p style="font-size: 13px; color: #718096; margin-bottom: 12px;">請在下方空白處簽下您的姓名：</p>
@@ -93,6 +94,7 @@
         </div>
       </div>
       
+      <!-- 簽署成功畫面 -->
       <div id="cv-success-msg" style="display:none; text-align:center; padding: 40px 0;">
         <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
         <h2 style="color: #28a745; margin-bottom: 8px;">簽署完成！</h2>
@@ -103,7 +105,7 @@
 
 
   <!-- ========================================== -->
-  <!-- 視圖 2：內部管理員系統 -->
+  <!-- 視圖 2：內部管理員系統 (新版範本介面) -->
   <!-- ========================================== -->
   <div id="admin-view" style="display: none;">
     <nav><h1>智嵂報價特助 (管理後台)</h1></nav>
@@ -116,7 +118,7 @@
       <!-- 01 需求與報價 -->
       <div id="tab1" class="tab-content active">
         <div class="card">
-          <h3 style="margin-top: 0;">📄 代理帳務委任書建檔 (新版)</h3>
+          <h3 style="margin-top: 0;">📄 代理帳務委任書建檔</h3>
           <input type="hidden" id="comm-req-id">
           <input type="hidden" id="comm-row-id">
           
@@ -145,7 +147,7 @@
 
         <div class="card">
           <h3 style="margin-top: 0; color:#2b6cb0;">🔗 產生客戶專屬簽署連結</h3>
-          <p style="font-size:12px; color:#718096; margin-bottom:12px;">請先儲存合約後，點擊下方按鈕產生連結，將網址傳給客戶進行手機簽署。</p>
+          <p style="font-size:12px; color:#718096; margin-bottom:12px;">儲存合約後，點擊下方按鈕產生連結，將連結傳給客戶進行手機簽署。</p>
           <button class="btn-secondary" style="width:100%; font-weight:bold; height:42px; color:#2b6cb0; border-color:#2b6cb0;" onclick="generateClientLink()">產生專屬簽署連結</button>
           
           <div id="link-result-container" style="display:none; margin-top:12px; background:#ebf8ff; padding:12px; border-radius:6px; word-break:break-all;">
@@ -155,21 +157,20 @@
         </div>
       </div>
 
-      <!-- 02 歸檔與追蹤 (純介面，不破壞舊有功能) -->
+      <!-- 02 歸檔與追蹤 -->
       <div id="tab2" class="tab-content">
         <div class="card">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <h3 style="margin: 0;">需求與建檔時間軸</h3>
             <button class="btn-secondary" onclick="loadRequirements()">重新整理</button>
           </div>
-          <div id="timeline-list" style="margin-top:12px; font-size:13px; color:#888; text-align:center;">請點擊重新整理...</div>
+          <div id="timeline-list" style="margin-top:12px; font-size:13px; color:#888; text-align:center;">載入中...</div>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // 透過呼叫 GAS 原生環境取得資料
     async function apiCall(action, payload) {
       const requestData = { action: action, payload: payload };
       try {
@@ -182,7 +183,7 @@
     }
 
     /* ========================================================= */
-    /* 核心路由邏輯 (判斷要顯示客戶簽署頁，還是後台管理頁) */
+    /* 核心路由邏輯 */
     /* ========================================================= */
     window.addEventListener('DOMContentLoaded', () => {
       if (URL_REQ_ID && URL_REQ_ID.trim() !== "") {
@@ -241,7 +242,7 @@
       if (clientCanvas.toDataURL() === blank.toDataURL()) return alert("請先在簽名板上簽下您的姓名！");
       
       const btn = document.getElementById('btn-client-submit');
-      btn.disabled = true; btn.textContent = "合約與 PDF 產出中，請稍候...";
+      btn.disabled = true; btn.textContent = "合約存檔中，請稍候...";
       
       try {
         const signatureBase64 = clientCanvas.toDataURL();
@@ -311,7 +312,7 @@
       finally { btn.disabled = false; btn.textContent = "💾 儲存合約資料"; }
     }
 
-    // 產生專屬客戶連結 (抓取當前 GAS 發布網址)
+    // 產生專屬客戶連結
     function generateClientLink() {
       const reqId = document.getElementById('comm-req-id').value;
       if(!reqId) return alert("請先點擊上方『儲存合約資料』，才能產生客戶連結！");
