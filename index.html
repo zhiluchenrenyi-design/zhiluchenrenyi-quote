@@ -58,7 +58,7 @@
         <div class="form-group"><label>地址</label><input type="text" id="address" class="form-input"></div>
         <div style="display:flex; gap:8px;">
           <div class="form-group" style="flex:1"><label>電話</label><input type="text" id="phone" class="form-input"></div>
-          <div class="form-group" style="flex:1"><label>合約書簽署日期</label><input type="text" id="signDate" class="form-input" placeholder="中華民國 115 年 08 月 01 日"></div>
+          <div class="form-group" style="flex:1"><label>合約書簽章日期</label><input type="text" id="signDate" class="form-input" placeholder="中華民國 115 年 08 月 01 日"></div>
         </div>
 
         <hr style="margin:20px 0; border:0; border-top:1px dashed #ccc;">
@@ -110,6 +110,7 @@
       </div>
     </div>
 
+    <!-- 02區 -->
     <div id="tab2" class="tab-content">
       <div class="card">
         <div style="display:flex; justify-content:space-between; margin-bottom:12px; align-items:center;">
@@ -134,7 +135,7 @@
       <div class="form-group"><label>內文</label><textarea id="mail-body" class="form-input" rows="8">親愛的客戶您好：
 
 附件為您的專屬代理帳務委任書，請您查閱。確認無誤後，請點擊下方專屬連結進行線上簽章：
-[線上簽署連結]
+[線上簽章連結]
 
 智嵂會計師事務所 敬上</textarea></div>
       <div class="form-group">
@@ -255,7 +256,7 @@
       // 這裡直接使用後端傳來的 SCRIPT_URL，保證網址正確且不報錯
       const link = `${SCRIPT_URL}?reqId=${reqId}`;
       let body = document.getElementById('mail-body').value;
-      document.getElementById('mail-body').value = body.replace(/\[線上簽署連結\].*/s, "[線上簽署連結]\n" + link + "\n\n智嵂會計師事務所 敬上");
+      document.getElementById('mail-body').value = body.replace(/\[線上簽章連結\].*/s, "[線上簽章連結]\n" + link + "\n\n智嵂會計師事務所 敬上");
       
       document.getElementById('emailModal').style.display = 'flex';
     }
