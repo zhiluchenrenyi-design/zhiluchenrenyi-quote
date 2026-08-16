@@ -5,7 +5,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>智嵂報價特助</title>
-  
   <style>
     * { box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
     body { margin: 0; padding: 0; background-color: #F4F5F7; color: #111111; -webkit-font-smoothing: antialiased; }
@@ -31,9 +30,7 @@
     .form-input { width: 100%; padding: 10px; border: 1px solid #E2E8F0; border-radius: 6px; font-size: 14px; background-color: #F8FAFC; }
     .dynamic-item-row { background: #FFFFFF; border: 1px dashed #CBD5E0; padding: 12px; border-radius: 6px; margin-bottom: 12px; position: relative; }
 
-    /* ========================================= */
     /* 客戶專屬線上簽署 A4 視圖樣式 */
-    /* ========================================= */
     #client-view { display: none; padding: 20px 10px; min-height: 100vh; background-color: #E2E8F0; }
     .a4-paper { background: #FFFFFF; max-width: 800px; margin: 0 auto; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 30px; font-size: 15px; line-height: 1.8; color: #2D3748; overflow: hidden; }
     .a4-paper h1 { text-align: center; font-size: 22px; color: #1A202C; margin-bottom: 30px; border-bottom: 2px solid #E2E8F0; padding-bottom: 10px; }
@@ -57,35 +54,66 @@
   </script>
 
   <!-- ========================================== -->
-  <!-- 視圖 1：客戶線上簽署專用 A4 畫面 -->
+  <!-- 視圖 1：客戶線上簽署專用 A4 畫面 (不可編輯文字) -->
   <!-- ========================================== -->
   <div id="client-view">
     <div class="a4-paper">
       <h1 id="cv-company-title">載入合約中...</h1>
       
       <div id="cv-contract-content" style="display:none; animation: fadeIn 0.5s;">
-        <p>主旨：承 貴公司委任智律會計師事務所辦理公司會計帳務處理、各項稅務之申報相關作業等服務，謹開列下列工作範圍及條件，請查照惠予同意並賜復。</p>
+        <p>主旨：承 貴公司委任智律會計師事務所（以下簡稱本事務所）辦理公司會計帳務處理、各項稅務之申報相關作業等服務，謹開列下列工作範圍及條件，請查照惠予同意並賜復。</p>
+        <p>說明：</p>
         <div class="a4-section">
           <div class="a4-title">一、委任方法：</div>
           <p style="margin:0;">本事務所將依據財政部發布之「所得稅法」相關規定，辦理會計帳務處理，並提供有關之諮詢服務。</p>
         </div>
+        
         <div class="a4-section">
-          <div class="a4-title">二、工作內容：</div>
+          <div class="a4-title">二、【工作內容】：</div>
           <ul class="a4-list" id="cv-work-items"></ul>
+          <p style="margin-top: 8px; font-size: 14px;">為順利達成上列工作，貴公司應提供應有之文件、憑證，並答覆有關問題之詢問；每期營業稅申報日截止前十日（即單數月五日以前），貴公司應交付相關憑證供本事務所整理申報。對貴公司所提供之一切資料本事務所均將嚴守秘密，惟當業務事件主管機關依法向本事務所查詢或調閱有關之工作底稿時，本事務所不得拒絕或規避。</p>
         </div>
+        
         <div class="a4-section">
-          <div class="a4-title">三、酬金及代墊費用：</div>
+          <div class="a4-title">三、【酬金及代墊費用】：</div>
+          <p style="margin:0;">第二條所列之工作內容之委任酬金如下：</p>
           <ul class="a4-list" id="cv-fee-items"></ul>
+          <p style="margin-top: 8px; font-size: 14px;">各項規費、稅金、郵資、交通費、代刻印鑑、代購發票及其他因提供服務而發生之代墊費用，應由貴公司負擔。代墊費用將由本事務所按實際發生金額製據向 貴公司收取，貴公司應於收到本事務所請款單據時，以即期支票、現金或電匯本事務所指定帳戶之方式支付酬金。各項稅金之代繳，貴公司應於該稅金繳納截止日之前一天，連同服務酬金一併支付。本事務所恕不代墊稅金。<br><br>委任酬金之調整，視貴公司營業額成長，或委任事務增加或帳務日益繁複時，本事務所得要求調整委任酬金。委任酬金之調整，委任事務所可就實際工作內容及帳務繁複程度，本事務所得要求調整委任酬金且須經雙方合意始得進行。</p>
         </div>
+        
         <div class="a4-section">
-          <div class="a4-title">四、委任期間：</div>
+          <div class="a4-title">四、【委任期間】：</div>
           <p style="margin:0;" id="cv-period"></p>
+        </div>
+
+        <div class="a4-section">
+          <div class="a4-title">五、終止委任：</div>
+          <p style="margin:0; font-size: 14px;">
+            (一) 任一方若欲終止委任，應於委任終止前十日以書面方式告知他方。<br>
+            (二) 貴公司如未能於本事務所指定之期限提交相關憑證，或延遲給付酬金達二個月或所提交之帳證文據虛偽不實，本事務所得以書面通知委任人終止其委任合約。<br>
+            (三) 本事務所應於委任終止後三十日內將貴公司之各項憑證、文件、帳冊、報表列冊交還貴公司，貴公司有收受領回之義務，不得拒絕，如有應付未付酬金及代墊費用，貴公司仍應支付。
+          </p>
+        </div>
+
+        <div class="a4-section">
+          <div class="a4-title">六、其他約定事項：</div>
+          <p style="margin:0; font-size: 14px;">
+            (一) 委任人深知提供足以公正表達公司財務狀況、營業結果、課稅所得額之憑證及攸關資料，乃委任人之責任，若因提供不實或不完整的資料及憑證，致使受任人遭受有形及（或）無形損失時，其一切法律責任及損失由委任人負責之。<br>
+            (二) 除經法院判決確定係受任人之故意或重大過失，受任人因提供本委任書之服務，無論其原因為何，受任人對委任人之最高賠償責任限於返還受任人因提供該項服務或工作成果已收取之公費；倘有任何其他第三人因此向受任人主張任何權利者，無論其原因為何，委任人同意補償並確保受任人及受任人之人員不遭受任何索賠、責任、費用及損失。<br>
+            (三) 受任人對職務上所獲悉有關委任人經營上之機密應盡保密之責，如有洩密願負法律之責任。<br>
+            (四) 本事務所若無法與貴公司取得聯絡，致無法繼續辦理委任範圍事項，本事務所應按本函記載之地址書面通知貴公司並限期回覆，貴公司若未於期限內回覆，本事務所僅自限期之次日起二個月內保管貴公司之相關資料，其一切法律責任由 貴公司自負。<br>
+            (五) 若 貴公司之各稅目有國稅局選案查核之情事，本事務所將視相關補充說明及文件準備所需增加投入之時間，另行報價收費。<br>
+            (六) 本委任書不含進銷存貨、營業成本與營業收入勾稽等相關報表編製服務，貴公司若因內部需求或主管機關要求需提供時，本事務所將視相關工作時間，另行報價收費。<br>
+            (七) 委任人若不於各項申報日規定期限日前提供受任人所指定之各項憑證、表報等資料，因而造成遲報滯報時，受任人不須負責。<br>
+            (八) 若後續服務之範圍或內容與本委任書不一致，將與委任人管理階層就異動內容達成共識，並以委任書或其他適當形式之書面協議予以約定，以釐清雙方之權利義務。<br>
+            (九) 茲致送本函兩份，如承蒙 貴公司同意由本事務所依本函條款進行服務，請於本函下端簽署。
+          </p>
         </div>
         
         <!-- 簽署區域 -->
         <div class="signature-area">
           <h3 style="margin-top: 0; color: #2D3748;">✍️ 委任方 (客戶) 線上簽署區</h3>
-          <p style="font-size: 13px; color: #718096; margin-bottom: 12px;">請在下方空白處簽下您的姓名：</p>
+          <p style="font-size: 13px; color: #718096; margin-bottom: 12px;">茲同意本函所述各點。請在下方空白處簽下您的姓名：</p>
           <div class="signature-pad-wrapper">
             <button class="sign-clear-btn" onclick="clearClientSignature()">🗑️ 清除重簽</button>
             <canvas id="client-signature-pad"></canvas>
@@ -103,7 +131,6 @@
     </div>
   </div>
 
-
   <!-- ========================================== -->
   <!-- 視圖 2：內部管理員系統 (新版範本介面) -->
   <!-- ========================================== -->
@@ -115,7 +142,6 @@
     </div>
 
     <div class="container">
-      <!-- 01 需求與報價 -->
       <div id="tab1" class="tab-content active">
         <div class="card">
           <h3 style="margin-top: 0;">📄 代理帳務委任書建檔</h3>
@@ -157,7 +183,6 @@
         </div>
       </div>
 
-      <!-- 02 歸檔與追蹤 -->
       <div id="tab2" class="tab-content">
         <div class="card">
           <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -182,9 +207,6 @@
       } catch (error) { throw error; }
     }
 
-    /* ========================================================= */
-    /* 核心路由邏輯 */
-    /* ========================================================= */
     window.addEventListener('DOMContentLoaded', () => {
       if (URL_REQ_ID && URL_REQ_ID.trim() !== "") {
         document.getElementById('client-view').style.display = 'block';
@@ -195,9 +217,6 @@
       }
     });
 
-    /* ========================================================= */
-    /* 客戶專屬：線上簽署視圖邏輯 */
-    /* ========================================================= */
     let clientCanvas, clientCtx, clientDrawing = false;
     
     async function initClientSigningView(reqId) {
@@ -256,9 +275,6 @@
       }
     }
 
-    /* ========================================================= */
-    /* 內部管理員：後台表單邏輯 */
-    /* ========================================================= */
     function switchTab(tabId) {
       document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -312,7 +328,6 @@
       finally { btn.disabled = false; btn.textContent = "💾 儲存合約資料"; }
     }
 
-    // 產生專屬客戶連結
     function generateClientLink() {
       const reqId = document.getElementById('comm-req-id').value;
       if(!reqId) return alert("請先點擊上方『儲存合約資料』，才能產生客戶連結！");
