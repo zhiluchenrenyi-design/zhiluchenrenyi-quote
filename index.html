@@ -68,10 +68,6 @@
     /* 分頁控制 */
     .pagination-controls { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 16px; font-size: 13px; }
 
-    /* 畫布與預覽區 */
-    .signature-pad-container { border: 1px solid #E5E5E5; border-radius: 4px; background-color: #FFFFFF; overflow: hidden; touch-action: none; position: relative; }
-    #signature-pad { width: 100%; height: 200px; display: block; cursor: crosshair; }
-
     /* Modal 彈窗 */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center; }
     .modal-box { background: #FFFFFF; padding: 24px; border-radius: 8px; width: 90%; max-width: 400px; max-height: 85vh; overflow-y: auto; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
@@ -82,32 +78,10 @@
     .badge-failed { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; font-size: 11px; padding: 2px 6px; border-radius: 12px; font-weight: 600; }
     .badge-draft { background-color: #e2e8f0; color: #334155; border: 1px solid #cbd5e1; font-size: 11px; padding: 2px 6px; border-radius: 12px; font-weight: 600; }
 
-    .history-log-item { padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
-    .history-time { font-size: 11px; color: #64748b; }
-    .history-module { font-weight: 600; color: #0f172a; margin-right: 4px; }
-    .history-action { color: #334155; }
-
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
-
-  <!-- 電子簽名板專屬 Modal -->
-  <div id="signature-modal" class="modal-overlay">
-    <div class="modal-box">
-      <h3 style="margin-top:0; font-size:16px;">✍️ 請在下方空白處簽名</h3>
-      <div class="signature-pad-container" style="margin-bottom:16px;">
-        <canvas id="signature-pad"></canvas>
-      </div>
-      <div style="display:flex; justify-content:space-between;">
-        <button class="btn-secondary" onclick="clearSignature()">🗑️ 清空</button>
-        <div style="display:flex; gap:8px;">
-          <button class="btn-secondary" onclick="closeSignatureModal()">取消</button>
-          <button class="btn-primary" onclick="confirmSignature()">確認</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- 歷史歷程 Log 彈窗 -->
   <div id="history-modal" class="modal-overlay">
@@ -142,7 +116,7 @@
       
       <!-- 📄 委任書建檔區塊 (全面改版對齊新範本) -->
       <div class="card" id="commission-doc-section">
-        <h3 style="margin-top: 0; font-size: 16px; font-weight: 700; margin-bottom: 12px;">📄 代理帳務委任書建檔 (新版)</h3>
+        <h3 style="margin-top: 0; font-size: 16px; font-weight: 700; margin-bottom: 12px;">📄 代理帳務委任書建檔 (新版範本)</h3>
         <input type="hidden" id="comm-req-id">
         <input type="hidden" id="comm-row-id">
         
@@ -201,23 +175,15 @@
         </div>
 
         <div style="margin-top: 20px;">
-          <button class="btn-secondary" style="width:100%; height: 48px; font-size: 14px; font-weight:bold;" id="btn-save-draft" onclick="handleSaveDraft()">💾 儲存草稿資料</button>
+          <button class="btn-secondary" style="width:100%; height: 48px; font-size: 14px; font-weight:bold;" id="btn-save-draft" onclick="handleSaveDraft()">💾 儲存資料</button>
         </div>
       </div>
 
-      <!-- 現場線上簽署與預覽區 -->
+      <!-- 產出 PDF 區塊 -->
       <div class="card">
-        <h3 style="margin-top: 0;">✍️ 線上簽署與預覽區</h3>
-        <div class="form-group" style="margin-top: 16px;">
-          <button class="btn-secondary" style="width:100%; height:48px; border:2px dashed #111; font-weight:bold;" onclick="openSignatureModal()">✍️ 點擊開啟簽名板</button>
-          <div id="signature-preview-container" style="display:none; margin-top:12px; text-align:center;">
-            <p style="font-size:12px; color:#888; text-align:left; margin-bottom:4px;">簽名結果：</p>
-            <img id="signature-preview-img" src="" style="max-height:100px; border:1px solid #E5E5E5; border-radius:4px; padding:4px;">
-          </div>
-        </div>
-        <div style="margin-top: 16px;">
-          <button class="btn-primary" style="width:100%; background-color:#2563eb; height: 48px; font-size: 14px;" id="btn-preview-pdf" onclick="generatePdfPreview()">🔍 預覽並產生 PDF (Google Doc 標籤替換)</button>
-        </div>
+        <h3 style="margin-top: 0;">📄 產生 PDF 委任書</h3>
+        <p style="font-size: 12px; color: #666; margin-bottom: 12px;">系統將自動替換 Google Doc 範本標籤，完美保留排版並產出 PDF。</p>
+        <button class="btn-primary" style="width:100%; background-color:#28a745; height: 48px; font-size: 14px;" id="btn-preview-pdf" onclick="generatePdfPreview()">📥 產出 PDF 並建檔至雲端</button>
 
         <!-- 產出後的 PDF 顯示區塊 -->
         <div id="pdf-preview-area" style="display:none; margin-top: 16px; border-top: 1px dashed #ccc; padding-top: 16px;">
@@ -228,7 +194,7 @@
       </div>
     </div>
 
-    <!-- ==================== 02 歸檔與追蹤 ==================== -->
+    <!-- ==================== 02 歸檔與追蹤 (完全不動) ==================== -->
     <div id="tab2" class="tab-content">
       <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -262,7 +228,7 @@
   </div>
 
   <script>
-    // ⚠️ 部署後請更新此網址
+    // ⚠️ 發布後若網址有變更，請更新此處
     const GAS_WEB_URL = "https://script.google.com/macros/s/AKfycbxKDzJ6CViZhgm75MLXmK9jO_ZM1Smo8Esy3wuj1JfD7PccBj4eNKp3TsLwKElRWmDb/exec";
 
     let globalRequirements = [];
@@ -305,7 +271,7 @@
       } catch (error) { throw error; }
     }
 
-    // --- 01區: 動態表單實作 (無上限) ---
+    // --- 01區: 動態表單實作 (打包 JSON) ---
     function addWorkItem(content = '') {
       const container = document.getElementById('work-items-container');
       const div = document.createElement('div');
@@ -325,7 +291,7 @@
       div.innerHTML = `
         <button type="button" class="btn-danger" style="position:absolute; right:12px; top:12px;" onclick="this.parentElement.remove()">刪除</button>
         <div class="form-group" style="margin-right: 50px; margin-bottom: 0;">
-          <input type="text" class="form-input item-fee" placeholder="例：每年各項業務處理費用：新台幣 19,800元/每年簽約時收取。" value="${escapeHtml(content)}">
+          <input type="text" class="form-input item-fee" placeholder="例：每年各項業務處理費用：新台幣 19,800元/每年簽約時收取" value="${escapeHtml(content)}">
         </div>`;
       container.appendChild(div);
     }
@@ -335,7 +301,6 @@
       document.getElementById('fee-items-container').innerHTML = '';
     }
 
-    // --- 01區: 表單資料擷取與 JSON 打包 ---
     function getCommFormData() {
       const workItems = [];
       document.querySelectorAll('.item-work').forEach(input => {
@@ -347,7 +312,7 @@
         if(input.value.trim()) feeItems.push(input.value.trim());
       });
 
-      // 處理簽約日期，轉換為民國格式
+      // 處理簽約日期轉換為民國格式
       let signDateStr = "";
       const rawDate = document.getElementById('comm-sign-date').value;
       if(rawDate) {
@@ -363,9 +328,9 @@
         address: document.getElementById('comm-address').value.trim(),
         period: document.getElementById('comm-period').value.trim(),
         phone: document.getElementById('comm-phone').value.trim(),
-        signDate: signDateStr, // 轉換後的民國日期
-        workItemsJSON: JSON.stringify(workItems), // 打包成 JSON 字串
-        feeItemsJSON: JSON.stringify(feeItems)    // 打包成 JSON 字串
+        signDate: signDateStr, 
+        workItemsJSON: JSON.stringify(workItems), // 打包成 JSON
+        feeItemsJSON: JSON.stringify(feeItems)    // 打包成 JSON
       };
     }
 
@@ -380,7 +345,7 @@
         document.getElementById('comm-req-id').value = res.reqId;
         alert("✅ 資料儲存成功！");
       } catch(err) { alert("儲存失敗：" + err.message); } 
-      finally { btn.disabled = false; btn.textContent = "💾 儲存草稿資料"; }
+      finally { btn.disabled = false; btn.textContent = "💾 儲存資料"; }
     }
 
     async function generatePdfPreview() {
@@ -388,24 +353,16 @@
       if (!data.companyName || !data.rep) return alert("請先填寫公司名稱與代表人以產生 PDF。");
       
       const btn = document.getElementById('btn-preview-pdf');
-      btn.disabled = true; btn.textContent = "呼叫後端產生 PDF 中...";
+      btn.disabled = true; btn.textContent = "呼叫後端產生 PDF 中 (需時數秒)...";
 
       try {
-        // 同步儲存至 Sheet
         const res = await apiCall('saveDraft', data);
         document.getElementById('comm-row-id').value = res._rowId;
         document.getElementById('comm-req-id').value = res.reqId;
         
-        // 如果有簽名圖片，帶入資料中
-        const previewImg = document.getElementById('signature-preview-img');
-        if (previewImg.src && previewImg.src.indexOf('data:image') !== -1) {
-          data.signatureDataUri = previewImg.src;
-        }
-
-        // 呼叫後端取代標籤並產出 PDF
+        // 呼叫後端取代 Google Doc 標籤並產出 PDF
         const uploadRes = await apiCall('generateAndUploadPDF', data);
         
-        // 顯示預覽區塊
         document.getElementById('pdf-link-container').innerHTML = `<a href="${uploadRes.fileUrl}" target="_blank" style="color:#2563eb; font-weight:bold; font-size:14px; text-decoration:underline;">🔗 點此於新分頁開啟 PDF</a>`;
         document.getElementById('pdf-preview-iframe').src = uploadRes.fileUrl.replace('/view', '/preview');
         document.getElementById('pdf-preview-area').style.display = 'block';
@@ -413,11 +370,11 @@
       } catch (err) {
         alert(`產生 PDF 失敗：${err.message}`);
       } finally {
-        btn.disabled = false; btn.textContent = "🔍 預覽並產生 PDF (Google Doc 標籤替換)";
+        btn.disabled = false; btn.textContent = "📥 產出 PDF 並建檔至雲端";
       }
     }
 
-    // --- 02區: Timeline 帶回修改 ---
+    // --- 02區: Timeline 回填 (還原 JSON) ---
     async function loadRequirements() {
       const timelineEl = document.getElementById('timeline-list');
       timelineEl.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">載入中...</div>';
@@ -484,24 +441,6 @@
       document.getElementById('pdf-preview-area').style.display = 'none';
     }
 
-    // --- 畫布邏輯 (維持不變) ---
-    let canvas, ctx, isDrawing = false;
-    function openSignatureModal() { document.getElementById('signature-modal').style.display = 'flex'; setTimeout(() => { if (!canvas) initCanvas(); resizeCanvas(); }, 100); }
-    function closeSignatureModal() { document.getElementById('signature-modal').style.display = 'none'; }
-    function initCanvas() { canvas = document.getElementById('signature-pad'); if (!canvas) return; ctx = canvas.getContext('2d'); window.addEventListener('resize', resizeCanvas); canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mousemove', draw); canvas.addEventListener('mouseup', stopDrawing); canvas.addEventListener('mouseout', stopDrawing); canvas.addEventListener('touchstart', startDrawing, {passive: false}); canvas.addEventListener('touchmove', draw, {passive: false}); canvas.addEventListener('touchend', stopDrawing, {passive: false}); }
-    function resizeCanvas() { if(!canvas || canvas.offsetWidth === 0) return; const rect = canvas.parentElement.getBoundingClientRect(); canvas.width = rect.width; canvas.height = 200; ctx.lineWidth = 3; ctx.lineCap = "round"; ctx.strokeStyle = "#111111"; }
-    function getPointerPos(e) { const rect = canvas.getBoundingClientRect(); let clientX = e.clientX; let clientY = e.clientY; if (e.touches && e.touches.length > 0) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; } return { x: clientX - rect.left, y: clientY - rect.top }; }
-    function startDrawing(e) { e.preventDefault(); isDrawing = true; const pos = getPointerPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
-    function draw(e) { if (!isDrawing) return; e.preventDefault(); const pos = getPointerPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); }
-    function stopDrawing(e) { if (!isDrawing) return; e.preventDefault(); isDrawing = false; }
-    function clearSignature() { if(ctx) ctx.clearRect(0, 0, canvas.width, canvas.height); }
-    function confirmSignature() {
-      const blankCanvas = document.createElement('canvas'); blankCanvas.width = canvas.width; blankCanvas.height = canvas.height;
-      if (canvas.toDataURL() === blankCanvas.toDataURL()) return alert("請在畫布上簽名！");
-      document.getElementById('signature-preview-img').src = canvas.toDataURL();
-      document.getElementById('signature-preview-container').style.display = 'block';
-      closeSignatureModal();
-    }
     function escapeHtml(str) { if (!str) return ''; return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
 
     window.addEventListener('DOMContentLoaded', () => {
