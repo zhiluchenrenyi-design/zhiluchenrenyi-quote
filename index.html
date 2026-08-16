@@ -10,6 +10,7 @@
     * { box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
     body { margin: 0; padding: 0; background-color: #F4F5F7; color: #111111; -webkit-font-smoothing: antialiased; }
     
+    /* 內部管理員視圖 */
     #admin-view nav { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #E5E5E5; background-color: #FFFFFF; }
     #admin-view nav h1 { font-size: 16px; font-weight: 700; margin: 0; }
     .tab-bar { display: flex; border-bottom: 1px solid #E5E5E5; background-color: #FFFFFF; }
@@ -29,7 +30,6 @@
     .form-group label { display: block; font-size: 13px; font-weight: 600; color: #4A5568; margin-bottom: 6px; }
     .form-input { width: 100%; padding: 10px; border: 1px solid #E2E8F0; border-radius: 6px; font-size: 14px; background-color: #F8FAFC; }
     .dynamic-item-row { background: #FFFFFF; border: 1px dashed #CBD5E0; padding: 12px; border-radius: 6px; margin-bottom: 12px; position: relative; }
-    textarea.form-input { line-height: 1.5; resize: vertical; }
 
     /* ========================================= */
     /* 客戶專屬線上簽署 A4 視圖樣式 */
@@ -39,7 +39,7 @@
     .a4-paper h1 { text-align: center; font-size: 22px; color: #1A202C; margin-bottom: 30px; border-bottom: 2px solid #E2E8F0; padding-bottom: 10px; }
     .a4-section { margin-bottom: 20px; }
     .a4-title { font-weight: bold; font-size: 16px; margin-bottom: 8px; color: #2D3748; }
-    .a4-content-block { padding-left: 20px; margin: 0; }
+    .a4-list { padding-left: 20px; margin: 0; }
     
     .signature-area { margin-top: 30px; border-top: 2px dashed #E2E8F0; padding-top: 20px; }
     .signature-pad-wrapper { border: 1px solid #CBD5E0; border-radius: 8px; background: #F8FAFC; overflow: hidden; position: relative; touch-action: none; margin-bottom: 16px; }
@@ -51,6 +51,7 @@
 </head>
 <body>
 
+  <!-- GAS 傳遞過來的變數 -->
   <script>
     const URL_REQ_ID = "<?= clientReqId ?>";
   </script>
@@ -70,11 +71,11 @@
         </div>
         <div class="a4-section">
           <div class="a4-title">二、工作內容：</div>
-          <div class="a4-content-block" id="cv-work-items"></div>
+          <ul class="a4-list" id="cv-work-items"></ul>
         </div>
         <div class="a4-section">
           <div class="a4-title">三、酬金及代墊費用：</div>
-          <div class="a4-content-block" id="cv-fee-items"></div>
+          <ul class="a4-list" id="cv-fee-items"></ul>
         </div>
         <div class="a4-section">
           <div class="a4-title">四、委任期間：</div>
@@ -91,20 +92,6 @@
           </div>
           <button class="btn-primary" id="btn-client-submit" onclick="submitClientContract()">確認簽署並送出合約</button>
         </div>
-
-        <!-- ★ 網頁版大小章顯示區塊 -->
-        <div style="margin-top: 50px; border-top: 1px solid #E2E8F0; padding-top: 20px;">
-          <p style="font-weight:bold; margin-bottom:4px;">受任人：智嵂會計師事務所 陳仁易 會計師</p>
-          <p style="margin:0; font-size:14px;">事務所地址：台中市西區忠明南路237號12樓之2</p>
-          <p style="margin:0; font-size:14px;">電話：04-23050265</p>
-          <div style="display: flex; gap: 20px; margin-top: 15px;">
-            <!-- 如果需要替換大小章，請將 src 裡的網址換成你的圖片連結 -->
-            <img src="https://i.imgur.com/your-big-stamp.png" alt="事務所大章" style="width: 120px; height: 120px; object-fit: contain; border:1px dashed #ccc; padding:4px;">
-            <img src="https://i.imgur.com/your-small-stamp.png" alt="負責人小章" style="width: 120px; height: 120px; object-fit: contain; border:1px dashed #ccc; padding:4px;">
-            <div style="font-size: 12px; color: #888; align-self: flex-end;">(此處為大小章預覽位置，請於程式碼更換實際圖片網址)</div>
-          </div>
-        </div>
-
       </div>
       
       <!-- 簽署成功畫面 -->
@@ -128,10 +115,12 @@
     </div>
 
     <div class="container">
+      <!-- 01 需求與報價 -->
       <div id="tab1" class="tab-content active">
         <div class="card">
           <h3 style="margin-top: 0;">📄 代理帳務委任書建檔</h3>
           <input type="hidden" id="comm-req-id">
+          <input type="hidden" id="comm-row-id">
           
           <div style="display: flex; gap: 8px;">
             <div class="form-group" style="flex: 1;"><label>公司名稱</label><input type="text" id="comm-company" class="form-input"></div>
@@ -145,11 +134,11 @@
           <div class="form-group" style="margin-top: 8px;"><label>合約書簽署日期</label><input type="date" id="comm-sign-date" class="form-input"></div>
           
           <div class="form-group" style="border-top: 1px solid #E5E5E5; padding-top:16px;">
-            <label style="display:flex; justify-content:space-between;"><span>二、工作內容</span><button class="btn-secondary" onclick="addWorkItem('')">+ 新增更多區塊</button></label>
+            <label style="display:flex; justify-content:space-between;"><span>二、工作內容</span><button class="btn-secondary" onclick="addWorkItem()">+ 新增</button></label>
             <div id="work-items-container"></div>
           </div>
           <div class="form-group" style="border-top: 1px solid #E5E5E5; padding-top:16px;">
-            <label style="display:flex; justify-content:space-between;"><span>三、酬金及代墊費用</span><button class="btn-secondary" onclick="addFeeItem('')">+ 新增更多區塊</button></label>
+            <label style="display:flex; justify-content:space-between;"><span>三、酬金及代墊費用</span><button class="btn-secondary" onclick="addFeeItem()">+ 新增</button></label>
             <div id="fee-items-container"></div>
           </div>
           
@@ -168,6 +157,7 @@
         </div>
       </div>
 
+      <!-- 02 歸檔與追蹤 -->
       <div id="tab2" class="tab-content">
         <div class="card">
           <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -192,18 +182,22 @@
       } catch (error) { throw error; }
     }
 
+    /* ========================================================= */
+    /* 核心路由邏輯 */
+    /* ========================================================= */
     window.addEventListener('DOMContentLoaded', () => {
       if (URL_REQ_ID && URL_REQ_ID.trim() !== "") {
         document.getElementById('client-view').style.display = 'block';
         initClientSigningView(URL_REQ_ID);
       } else {
         document.getElementById('admin-view').style.display = 'block';
-        // 載入預設的自填字句
-        addWorkItem("(一) 每年會計帳務處理 \n(二) 其他各項稅務申報：\n1. 個人綜合所得稅申報。\n2. 各類所得扣繳申報（不含個別員工之薪資計算）。\n3. 每半年業務狀況調查表填寫。"); 
-        addFeeItem("(一) 每年各項業務處理費用：新台幣 19,800 元/每年簽約時收取。 \n(二) 其他服務（每年增收之工作酬金）： \n1.各類所得及股利憑單扣繳申報：新台幣 1600 元/每年簽約時收取。 \n2.綜合所得稅申報：新台幣 1600 元/簽約時收取。");
+        addWorkItem(); addFeeItem();
       }
     });
 
+    /* ========================================================= */
+    /* 客戶專屬：線上簽署視圖邏輯 */
+    /* ========================================================= */
     let clientCanvas, clientCtx, clientDrawing = false;
     
     async function initClientSigningView(reqId) {
@@ -212,15 +206,10 @@
         document.getElementById('cv-company-title').textContent = `${data.companyName} 委任書`;
         document.getElementById('cv-period').textContent = data.period;
         
-        const workDiv = document.getElementById('cv-work-items');
-        JSON.parse(data.workItemsJSON || "[]").forEach(item => { 
-          workDiv.innerHTML += `<div style="margin-bottom:12px;">${escapeHtml(item).replace(/\n/g, '<br>')}</div>`; 
-        });
-        
-        const feeDiv = document.getElementById('cv-fee-items');
-        JSON.parse(data.feeItemsJSON || "[]").forEach(item => { 
-          feeDiv.innerHTML += `<div style="margin-bottom:12px;">${escapeHtml(item).replace(/\n/g, '<br>')}</div>`; 
-        });
+        const workUl = document.getElementById('cv-work-items');
+        JSON.parse(data.workItemsJSON || "[]").forEach(item => { workUl.innerHTML += `<li style="margin-bottom:6px;">${escapeHtml(item)}</li>`; });
+        const feeUl = document.getElementById('cv-fee-items');
+        JSON.parse(data.feeItemsJSON || "[]").forEach(item => { feeUl.innerHTML += `<li style="margin-bottom:6px;">${escapeHtml(item)}</li>`; });
 
         document.getElementById('cv-contract-content').style.display = 'block';
         initClientSignaturePad();
@@ -267,6 +256,9 @@
       }
     }
 
+    /* ========================================================= */
+    /* 內部管理員：後台表單邏輯 */
+    /* ========================================================= */
     function switchTab(tabId) {
       document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -275,18 +267,17 @@
       if(tabId === 'tab2') loadRequirements();
     }
 
-    // 改用 textarea 讓多行文字編輯更順暢
     function addWorkItem(content = '') {
       const container = document.getElementById('work-items-container');
       const div = document.createElement('div'); div.className = 'dynamic-item-row';
-      div.innerHTML = `<button type="button" class="btn-danger" style="position:absolute; right:12px; top:12px;" onclick="this.parentElement.remove()">刪除</button><div class="form-group" style="margin-right: 50px; margin-bottom: 0;"><textarea class="form-input item-work" rows="5">${escapeHtml(content)}</textarea></div>`;
+      div.innerHTML = `<button type="button" class="btn-danger" style="position:absolute; right:12px; top:12px;" onclick="this.parentElement.remove()">刪除</button><div class="form-group" style="margin-right: 50px; margin-bottom: 0;"><input type="text" class="form-input item-work" value="${escapeHtml(content)}"></div>`;
       container.appendChild(div);
     }
 
     function addFeeItem(content = '') {
       const container = document.getElementById('fee-items-container');
       const div = document.createElement('div'); div.className = 'dynamic-item-row';
-      div.innerHTML = `<button type="button" class="btn-danger" style="position:absolute; right:12px; top:12px;" onclick="this.parentElement.remove()">刪除</button><div class="form-group" style="margin-right: 50px; margin-bottom: 0;"><textarea class="form-input item-fee" rows="5">${escapeHtml(content)}</textarea></div>`;
+      div.innerHTML = `<button type="button" class="btn-danger" style="position:absolute; right:12px; top:12px;" onclick="this.parentElement.remove()">刪除</button><div class="form-group" style="margin-right: 50px; margin-bottom: 0;"><input type="text" class="form-input item-fee" value="${escapeHtml(content)}"></div>`;
       container.appendChild(div);
     }
 
@@ -298,6 +289,7 @@
 
       return {
         reqId: document.getElementById('comm-req-id').value,
+        _rowId: document.getElementById('comm-row-id').value,
         companyName: document.getElementById('comm-company').value.trim(),
         rep: document.getElementById('comm-rep').value.trim(),
         address: document.getElementById('comm-address').value.trim(),
@@ -313,12 +305,14 @@
       const btn = document.getElementById('btn-save-draft'); btn.disabled = true; btn.textContent = "儲存中...";
       try {
         const res = await apiCall('saveDraft', data);
+        document.getElementById('comm-row-id').value = res._rowId;
         document.getElementById('comm-req-id').value = res.reqId;
         alert("✅ 儲存成功！現在可以產生連結給客戶了。");
       } catch(err) { alert("儲存失敗：" + err.message); } 
       finally { btn.disabled = false; btn.textContent = "💾 儲存合約資料"; }
     }
 
+    // 產生專屬客戶連結
     function generateClientLink() {
       const reqId = document.getElementById('comm-req-id').value;
       if(!reqId) return alert("請先點擊上方『儲存合約資料』，才能產生客戶連結！");
@@ -340,15 +334,16 @@
       timelineEl.innerHTML = '載入中...';
       try { 
         const reqs = await apiCall('getRequirements', {}); 
-        timelineEl.innerHTML = reqs.length === 0 ? '無資料' : reqs.map(r => `<div style="border-bottom:1px solid #eee; padding:10px; text-align:left;"><b>${r.companyName}</b><br>單號: ${r.reqId}<br>狀態: ${r.status || '建檔中'}<br><a href="javascript:void(0)" onclick='reverseEditForm(${JSON.stringify(r).replace(/'/g, "&apos;")})'>✏️ 載入修改</a></div>`).join('');
+        timelineEl.innerHTML = reqs.length === 0 ? '無資料' : reqs.map(r => `<div style="border-bottom:1px solid #eee; padding:10px; text-align:left;"><b>${r.companyName}</b><br>單號: ${r.reqId}<br>狀態: ${r.status}<br><a href="javascript:void(0)" onclick='reverseEditForm(${JSON.stringify(r).replace(/'/g, "&apos;")})'>✏️ 載入修改</a></div>`).join('');
       } catch (err) { timelineEl.innerHTML = '載入失敗'; }
     }
 
     function reverseEditForm(item) {
       switchTab('tab1');
       document.getElementById('comm-req-id').value = item.reqId || '';
+      document.getElementById('comm-row-id').value = item._rowId || '';
       document.getElementById('comm-company').value = item.companyName || '';
-      document.getElementById('comm-rep').value = item.rep || '';
+      document.getElementById('comm-rep').value = item.customerName || '';
       document.getElementById('comm-address').value = item.address || '';
       document.getElementById('comm-period').value = item.period || '';
       document.getElementById('comm-phone').value = item.phone || '';
@@ -358,8 +353,8 @@
         JSON.parse(item.workItemsJSON || "[]").forEach(w => addWorkItem(w));
         JSON.parse(item.feeItemsJSON || "[]").forEach(f => addFeeItem(f));
       } catch(e) {}
-      if(document.getElementById('work-items-container').children.length === 0) addWorkItem('');
-      if(document.getElementById('fee-items-container').children.length === 0) addFeeItem('');
+      if(document.getElementById('work-items-container').children.length === 0) addWorkItem();
+      if(document.getElementById('fee-items-container').children.length === 0) addFeeItem();
       document.getElementById('link-result-container').style.display = 'none';
     }
 
