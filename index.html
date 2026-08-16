@@ -33,6 +33,9 @@
   </style>
 </head>
 <body>
+  <!-- 取得後端傳遞過來的正確正式網址 -->
+  <script> const SCRIPT_URL = "<?= scriptUrl ?>"; </script>
+
   <nav>智嵂報價特助 - 內部建檔系統</nav>
   <div class="tab-bar">
     <div class="tab-item active" onclick="switchTab('tab1')">01_需求與建檔</div>
@@ -93,6 +96,7 @@
         <button class="btn btn-primary" id="btn-save-draft" onclick="saveDraft()">💾 儲存草稿資料</button>
         <hr style="margin:20px 0; border:0; border-top:1px dashed #ccc;">
         
+        <!-- 三階段按鈕流程 -->
         <p style="font-size:13px; color:#666; font-weight:bold;">🚀 輸出與寄送流程 (請依序執行)：</p>
         <div style="display:flex; flex-direction:column; gap:8px;">
           <button class="btn btn-warning" id="btn-doc" onclick="generateDoc()">📄 1. 產出 Word (Google文件) 並手動確認排版</button>
@@ -106,7 +110,6 @@
       </div>
     </div>
 
-    <!-- 02區 -->
     <div id="tab2" class="tab-content">
       <div class="card">
         <div style="display:flex; justify-content:space-between; margin-bottom:12px; align-items:center;">
@@ -128,9 +131,9 @@
       <div class="form-group"><label>寄件人</label><input type="text" class="form-input" value="zhiluchenrenyi@gmail.com" readonly style="background:#eee;"></div>
       <div class="form-group"><label>收件人 (請填寫客戶信箱)</label><input type="email" id="mail-to" class="form-input" placeholder="example@gmail.com"></div>
       <div class="form-group"><label>主旨</label><input type="text" id="mail-subject" class="form-input"></div>
-      <div class="form-group"><label>內文</label><textarea id="mail-body" class="form-input" rows="7">親愛的客戶您好：
+      <div class="form-group"><label>內文</label><textarea id="mail-body" class="form-input" rows="8">親愛的客戶您好：
 
-附件為您的專屬代理帳務委任書，請您查閱。確認無誤後，請點擊下方專屬連結進行線上簽署：
+附件為您的專屬代理帳務委任書，請您查閱。確認無誤後，請點擊下方專屬連結進行線上簽章：
 [線上簽署連結]
 
 智嵂會計師事務所 敬上</textarea></div>
@@ -147,8 +150,6 @@
   </div>
 
   <script>
-    // ⚠️ 這是本機測試用的 URL，正式環境會自動抓
-    const GAS_WEB_URL = "https://script.google.com/macros/s/AKfycbxKDzJ6CViZhgm75MLXmK9jO_ZM1Smo8Esy3wuj1JfD7PccBj4eNKp3TsLwKElRWmDb/exec";
     let globalList = [];
 
     async function apiCall(action, payload) {
@@ -161,13 +162,6 @@
             })
             .withFailureHandler(err => reject(err))
             .processBackendRouting({ action: action, payload: payload });
-        } else {
-          fetch(GAS_WEB_URL, { method: 'POST', body: JSON.stringify({ action: action, payload: payload }) })
-            .then(res => res.json())
-            .then(res => {
-              if (res.status !== "success") reject(new Error(res.message));
-              else resolve(res.data);
-            }).catch(reject);
         }
       });
     }
@@ -258,13 +252,11 @@
       
       document.getElementById('mail-subject').value = `【${document.getElementById('companyName').value}】 帳務委任書`;
       
-      if (typeof google !== 'undefined' && google.script) {
-        google.script.url.getLocation(loc => {
-          const link = `${loc.href.split('?')[0]}?reqId=${reqId}`;
-          let body = document.getElementById('mail-body').value;
-          document.getElementById('mail-body').value = body.replace(/\[線上簽署連結\].*/s, "[線上簽署連結]\n" + link + "\n\n智嵂會計師事務所 敬上");
-        });
-      }
+      // 這裡直接使用後端傳來的 SCRIPT_URL，保證網址正確且不報錯
+      const link = `${SCRIPT_URL}?reqId=${reqId}`;
+      let body = document.getElementById('mail-body').value;
+      document.getElementById('mail-body').value = body.replace(/\[線上簽署連結\].*/s, "[線上簽署連結]\n" + link + "\n\n智嵂會計師事務所 敬上");
+      
       document.getElementById('emailModal').style.display = 'flex';
     }
 
