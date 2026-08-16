@@ -6,152 +6,132 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>智嵂報價特助</title>
   
-  <!-- 引入 html2pdf.js 套件 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
   <style>
-    /* 全局樣式設定 */
-    * { box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
-    body { margin: 0; padding: 0; background-color: #FFFFFF; color: #111111; -webkit-font-smoothing: antialiased; }
+    * { box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+    body { margin: 0; padding: 0; background-color: #F4F5F7; color: #111111; -webkit-font-smoothing: antialiased; }
     
-    /* 導覽列與頁籤 */
-    nav { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #E5E5E5; position: sticky; top: 0; background-color: #FFFFFF; z-index: 100; }
-    nav h1 { font-size: 16px; font-weight: 700; margin: 0; }
-    .network-indicator { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; }
-    .status-online { background-color: #28a745; }
-    .status-offline { background-color: #dc3545; }
+    #admin-view nav { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #E5E5E5; background-color: #FFFFFF; }
+    #admin-view nav h1 { font-size: 16px; font-weight: 700; margin: 0; }
     .tab-bar { display: flex; border-bottom: 1px solid #E5E5E5; background-color: #FFFFFF; }
     .tab-item { flex: 1; text-align: center; padding: 12px 0; font-size: 14px; font-weight: 600; color: #888888; cursor: pointer; border-bottom: 2px solid transparent; }
     .tab-item.active { color: #111111; border-bottom: 2px solid #111111; }
-
-    /* 內容區塊 */
-    .container { padding: 16px; }
-    .tab-content { display: none; animation: fadeIn 0.3s ease; }
-    .tab-content.active { display: block; }
-    .card { background-color: #F8F9FA; border: 1px solid #E5E5E5; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
-
-    /* 按鈕與表單 */
-    .btn-primary { background-color: #111111; color: #FFFFFF; border: none; border-radius: 4px; padding: 0 16px; cursor: pointer; height: 36px; font-size: 13px; font-weight: 600; }
-    .btn-primary:disabled { background-color: #888888; cursor: not-allowed; }
-    .btn-secondary { background-color: #FFFFFF; color: #111111; border: 1px solid #E5E5E5; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 13px; }
-    .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #444444; margin-bottom: 4px; }
-    .form-input { width: 100%; padding: 8px 10px; border: 1px solid #E5E5E5; border-radius: 4px; font-size: 14px; background-color: #FFFFFF; }
-    textarea.form-input { resize: vertical; min-height: 80px; }
+    .container { padding: 16px; max-width: 800px; margin: 0 auto; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s; }
     
-    /* 畫布與 A4 預覽 */
-    .signature-pad-container { border: 1px solid #E5E5E5; border-radius: 4px; background-color: #FFFFFF; overflow: hidden; touch-action: none; position: relative; }
-    #signature-pad, #client-signature-pad { width: 100%; height: 200px; display: block; cursor: crosshair; }
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center; }
-    .modal-box { background: #FFFFFF; padding: 24px; border-radius: 8px; width: 90%; max-width: 400px; }
-    
-    .a4-container-wrapper { overflow-x: auto; background: #E5E5E5; padding: 20px; border-radius: 8px; margin-top: 16px; }
-    .a4-container { background: #fff; width: 210mm; min-height: 297mm; padding: 25mm 20mm; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 0 auto; text-align: left; color: #000; line-height: 1.8; font-size: 15px; }
+    .card { background-color: #FFFFFF; border: 1px solid #E5E5E5; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .btn-primary { background-color: #111111; color: #FFFFFF; border: none; border-radius: 6px; padding: 0 16px; height: 42px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; width: 100%; }
+    .btn-primary:disabled { background-color: #A0AEC0; cursor: not-allowed; }
+    .btn-secondary { background-color: #FFFFFF; color: #111111; border: 1px solid #CBD5E0; border-radius: 4px; padding: 6px 12px; cursor: pointer; font-size: 13px; }
+    .btn-danger { background-color: #E53E3E; color: white; border: none; border-radius: 4px; padding: 4px 10px; font-size: 12px; cursor: pointer; }
 
-    /* Timeline */
-    .timeline-container { position: relative; padding-left: 18px; border-left: 2px solid #E5E5E5; margin-top: 12px; }
-    .timeline-item { position: relative; margin-bottom: 20px; }
-    .timeline-dot { position: absolute; left: -24px; top: 14px; width: 10px; height: 10px; border-radius: 50%; background-color: #111111; border: 2px solid #FFFFFF; }
-    .timeline-card { background: #FFFFFF; border: 1px solid #E5E5E5; border-radius: 6px; padding: 14px; }
-    .badge-draft { background-color: #e2e8f0; color: #334155; border: 1px solid #cbd5e1; font-size: 11px; padding: 2px 6px; border-radius: 12px; font-weight: 600; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: #4A5568; margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 10px; border: 1px solid #E2E8F0; border-radius: 6px; font-size: 14px; background-color: #F8FAFC; }
+    .dynamic-item-row { background: #FFFFFF; border: 1px dashed #CBD5E0; padding: 12px; border-radius: 6px; margin-bottom: 12px; position: relative; }
+    textarea.form-input { line-height: 1.5; resize: vertical; }
 
-    /* 客戶專屬線上簽署 A4 視圖 */
+    /* ========================================= */
+    /* 客戶專屬線上簽署 A4 視圖樣式 */
+    /* ========================================= */
     #client-view { display: none; padding: 20px 10px; min-height: 100vh; background-color: #E2E8F0; }
-    .client-a4-paper { background: #FFFFFF; max-width: 800px; margin: 0 auto; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 30px; font-size: 15px; line-height: 1.8; color: #2D3748; }
+    .a4-paper { background: #FFFFFF; max-width: 800px; margin: 0 auto; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 30px; font-size: 15px; line-height: 1.8; color: #2D3748; overflow: hidden; }
+    .a4-paper h1 { text-align: center; font-size: 22px; color: #1A202C; margin-bottom: 30px; border-bottom: 2px solid #E2E8F0; padding-bottom: 10px; }
+    .a4-section { margin-bottom: 20px; }
+    .a4-title { font-weight: bold; font-size: 16px; margin-bottom: 8px; color: #2D3748; }
+    .a4-content-block { padding-left: 20px; margin: 0; }
+    
+    .signature-area { margin-top: 30px; border-top: 2px dashed #E2E8F0; padding-top: 20px; }
+    .signature-pad-wrapper { border: 1px solid #CBD5E0; border-radius: 8px; background: #F8FAFC; overflow: hidden; position: relative; touch-action: none; margin-bottom: 16px; }
+    #client-signature-pad { width: 100%; height: 250px; cursor: crosshair; }
+    .sign-clear-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.9); border: 1px solid #E2E8F0; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; }
 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   </style>
 </head>
 <body>
 
-  <!-- GAS 傳遞過來的變數 (用於判斷是否為客戶檢視模式) -->
-  <script> const URL_REQ_ID = "<?= clientReqId ?>"; </script>
+  <script>
+    const URL_REQ_ID = "<?= clientReqId ?>";
+  </script>
 
   <!-- ========================================== -->
   <!-- 視圖 1：客戶線上簽署專用 A4 畫面 -->
   <!-- ========================================== -->
   <div id="client-view">
-    <div class="client-a4-paper">
-      <h1 id="cv-company-title" style="text-align: center; border-bottom: 2px solid #eee; padding-bottom: 10px;">載入合約中...</h1>
+    <div class="a4-paper">
+      <h1 id="cv-company-title">載入合約中...</h1>
       
       <div id="cv-contract-content" style="display:none; animation: fadeIn 0.5s;">
-        <p>主旨：承 貴公司委任智律會計師事務所（以下簡稱本事務所）辦理公司會計帳務處理、各項稅務之申報相關作業等服務，謹開列下列工作範圍及條件，請查照惠予同意並賜復。</p>
-        <p><strong>一、委任方法：</strong><br>本事務所將依據財政部發布之「所得稅法」相關規定，辦理會計帳務處理，並提供有關之諮詢服務。</p>
+        <p>主旨：承 貴公司委任智律會計師事務所辦理公司會計帳務處理、各項稅務之申報相關作業等服務，謹開列下列工作範圍及條件，請查照惠予同意並賜復。</p>
+        <div class="a4-section">
+          <div class="a4-title">一、委任方法：</div>
+          <p style="margin:0;">本事務所將依據財政部發布之「所得稅法」相關規定，辦理會計帳務處理，並提供有關之諮詢服務。</p>
+        </div>
+        <div class="a4-section">
+          <div class="a4-title">二、工作內容：</div>
+          <div class="a4-content-block" id="cv-work-items"></div>
+        </div>
+        <div class="a4-section">
+          <div class="a4-title">三、酬金及代墊費用：</div>
+          <div class="a4-content-block" id="cv-fee-items"></div>
+        </div>
+        <div class="a4-section">
+          <div class="a4-title">四、委任期間：</div>
+          <p style="margin:0;" id="cv-period"></p>
+        </div>
         
-        <p><strong>二、工作內容：</strong></p>
-        <pre id="cv-work-items" style="font-family:inherit; white-space: pre-wrap; margin:0;"></pre>
-        <p style="font-size:14px;">為順利達成上列工作，貴公司應提供應有之文件、憑證，並答覆有關問題之詢問；每期營業稅申報日截止前十日（即單數月五日以前），貴公司應交付相關憑證供本事務所整理申報。對貴公司所提供之一切資料本事務所均將嚴守秘密，惟當業務事件主管機關依法向本事務所查詢或調閱有關之工作底稿時，本事務所不得拒絕或規避。</p>
-        
-        <p><strong>三、酬金及代墊費用：</strong><br>第二條所列之工作內容之委任酬金如下：</p>
-        <pre id="cv-fee-items" style="font-family:inherit; white-space: pre-wrap; margin:0;"></pre>
-        <p style="font-size:14px;">各項規費、稅金、郵資、交通費、代刻印鑑、代購發票及其他因提供服務而發生之代墊費用，應由貴公司負擔。代墊費用將由本事務所按實際發生金額製據向 貴公司收取，貴公司應於收到本事務所請款單據時，以即期支票、現金或電匯本事務所指定帳戶之方式支付酬金。各項稅金之代繳，貴公司應於該稅金繳納截止日之前一天，連同服務酬金一併支付。本事務所恕不代墊稅金。<br>委任酬金之調整，委任事務所可就實際工作內容及帳務繁複程度，本事務所得要求調整委任酬金且須經雙方合意始得進行。</p>
-        
-        <p><strong>四、委任期間：</strong><span id="cv-period"></span></p>
-
-        <div style="margin-top: 40px; border-top: 2px dashed #E2E8F0; padding-top: 20px;">
-          <h3 style="margin-top: 0;">✍️ 委任方 (客戶) 線上簽署區</h3>
-          <p style="font-size: 13px; color: #718096;">請在下方空白處簽名。簽署後將與本所大小章合成正式合約 PDF。</p>
-          <div class="signature-pad-container" style="margin-bottom:16px;">
+        <!-- 簽署區域 -->
+        <div class="signature-area">
+          <h3 style="margin-top: 0; color: #2D3748;">✍️ 委任方 (客戶) 線上簽署區</h3>
+          <p style="font-size: 13px; color: #718096; margin-bottom: 12px;">請在下方空白處簽下您的姓名：</p>
+          <div class="signature-pad-wrapper">
+            <button class="sign-clear-btn" onclick="clearClientSignature()">🗑️ 清除重簽</button>
             <canvas id="client-signature-pad"></canvas>
-            <button onclick="clearClientSignature()" style="position:absolute; top:5px; right:5px;">🗑️ 清空</button>
           </div>
-          <button class="btn-primary" style="width:100%; height:48px;" id="btn-client-submit" onclick="submitClientContract()">確認簽署並送出</button>
+          <button class="btn-primary" id="btn-client-submit" onclick="submitClientContract()">確認簽署並送出合約</button>
         </div>
-        
-        <!-- 【重點5】顯示官方大小章 -->
-        <div style="margin-top: 30px; position: relative;">
-          <p>受任人：智嵂會計師事務所</p>
-          <!-- 請將下方 src 的網址替換為你放在網路上的印章圖檔網址 -->
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Red_seal.svg/1024px-Red_seal.svg.png" alt="官方大小章" style="width: 80px; position: absolute; top: -10px; left: 180px; opacity: 0.8;">
+
+        <!-- ★ 網頁版大小章顯示區塊 -->
+        <div style="margin-top: 50px; border-top: 1px solid #E2E8F0; padding-top: 20px;">
+          <p style="font-weight:bold; margin-bottom:4px;">受任人：智嵂會計師事務所 陳仁易 會計師</p>
+          <p style="margin:0; font-size:14px;">事務所地址：台中市西區忠明南路237號12樓之2</p>
+          <p style="margin:0; font-size:14px;">電話：04-23050265</p>
+          <div style="display: flex; gap: 20px; margin-top: 15px;">
+            <!-- 如果需要替換大小章，請將 src 裡的網址換成你的圖片連結 -->
+            <img src="https://i.imgur.com/your-big-stamp.png" alt="事務所大章" style="width: 120px; height: 120px; object-fit: contain; border:1px dashed #ccc; padding:4px;">
+            <img src="https://i.imgur.com/your-small-stamp.png" alt="負責人小章" style="width: 120px; height: 120px; object-fit: contain; border:1px dashed #ccc; padding:4px;">
+            <div style="font-size: 12px; color: #888; align-self: flex-end;">(此處為大小章預覽位置，請於程式碼更換實際圖片網址)</div>
+          </div>
         </div>
+
       </div>
       
+      <!-- 簽署成功畫面 -->
       <div id="cv-success-msg" style="display:none; text-align:center; padding: 40px 0;">
-        <h2>✅ 簽署完成！</h2>
-        <p>合約已正式存檔並生效。</p>
+        <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
+        <h2 style="color: #28a745; margin-bottom: 8px;">簽署完成！</h2>
+        <p style="color: #4A5568;">我們已經收到您的簽署憑證，並將正式合約存檔。</p>
       </div>
     </div>
   </div>
 
 
   <!-- ========================================== -->
-  <!-- 視圖 2：內部管理員系統 (保留所有原版功能) -->
+  <!-- 視圖 2：內部管理員系統 (新版範本介面) -->
   <!-- ========================================== -->
   <div id="admin-view" style="display: none;">
-    <!-- 原版簽名 Modal -->
-    <div id="signature-modal" class="modal-overlay">
-      <div class="modal-box">
-        <h3 style="margin-top:0;">✍️ 請在下方簽名</h3>
-        <div class="signature-pad-container" style="margin-bottom:16px;"><canvas id="signature-pad"></canvas></div>
-        <div style="display:flex; justify-content:space-between;">
-          <button class="btn-secondary" onclick="clearSignature()">清空</button>
-          <button class="btn-primary" onclick="confirmSignature()">確認</button>
-        </div>
-      </div>
-    </div>
-
-    <nav>
-      <h1>智嵂報價特助</h1>
-      <div class="network-indicator"><div class="status-dot status-online"></div><span>Online</span></div>
-    </nav>
+    <nav><h1>智嵂報價特助 (管理後台)</h1></nav>
     <div class="tab-bar">
-      <div class="tab-item active" data-target="tab1" onclick="switchTab('tab1')">01_需求與報價</div>
+      <div class="tab-item active" data-target="tab1" onclick="switchTab('tab1')">01_需求與建檔</div>
       <div class="tab-item" data-target="tab2" onclick="switchTab('tab2')">02_歸檔與追蹤</div>
     </div>
 
     <div class="container">
       <div id="tab1" class="tab-content active">
-        <!-- 保留模擬 LINE -->
         <div class="card">
-          <h3 style="margin: 0; font-size: 15px;">📲 模擬接收 LINE 對話 (Gemini AI 提煉)</h3>
-          <textarea id="line-input" rows="2" class="form-input" placeholder="貼上 LINE 對話..."></textarea>
-          <button class="btn-primary" style="margin-top:8px;" onclick="handleSimulateLineMsg()">模擬接收</button>
-        </div>
-
-        <div class="card" id="commission-doc-section">
-          <h3 style="margin-top: 0;">📄 代理稅務申報委任書建檔 (新版)</h3>
-          <input type="hidden" id="comm-req-id"><input type="hidden" id="comm-row-id">
+          <h3 style="margin-top: 0;">📄 代理帳務委任書建檔</h3>
+          <input type="hidden" id="comm-req-id">
           
           <div style="display: flex; gap: 8px;">
             <div class="form-group" style="flex: 1;"><label>公司名稱</label><input type="text" id="comm-company" class="form-input"></div>
@@ -160,127 +140,133 @@
           <div class="form-group"><label>地址</label><input type="text" id="comm-address" class="form-input"></div>
           <div style="display: flex; gap: 8px;">
             <div class="form-group" style="flex: 1;"><label>電話</label><input type="text" id="comm-phone" class="form-input"></div>
-            <div class="form-group" style="flex: 1;"><label>委任期間</label><input type="text" id="comm-period" class="form-input" placeholder="自2026年1月01日至..."></div>
+            <div class="form-group" style="flex: 1;"><label>委任期間</label><input type="text" id="comm-period" class="form-input" placeholder="例：自2026年1月01日至2026年12月31日起"></div>
           </div>
           <div class="form-group" style="margin-top: 8px;"><label>合約書簽署日期</label><input type="date" id="comm-sign-date" class="form-input"></div>
-
-          <!-- 【重點2】工作內容預設字句 (可編輯) -->
-          <div class="form-group" style="margin-top: 16px;">
-            <label>二、工作內容【工作內容_自填】</label>
-            <textarea id="comm-work" class="form-input" rows="6">(一) 每年會計帳務處理 
-(二) 其他各項稅務申報： 
-1. 個人綜合所得稅申報。
-2. 各類所得扣繳申報（不含個別員工之薪資計算）。
-3. 每半年業務狀況調查表填寫。</textarea>
-          </div>
-
-          <!-- 【重點3】酬金預設字句 (可編輯) -->
-          <div class="form-group" style="margin-top: 16px;">
-            <label>三、酬金及代墊費用【酬金_自填】</label>
-            <textarea id="comm-fee" class="form-input" rows="6">(一) 每年各項業務處理費用：新台幣 19,800 元/每年簽約時收取。 
-(二) 其他服務（每年增收之工作酬金）： 
-1.各類所得及股利憑單扣繳申報：新台幣 1600 元/每年簽約時收取。 
-2.綜合所得稅申報：新台幣 1600 元/簽約時收取。</textarea>
-          </div>
-
-          <button class="btn-secondary" style="width:100%; height:48px;" onclick="handleSaveDraft()">💾 儲存草稿</button>
           
-          <!-- 產生客戶連結 -->
-          <div style="margin-top:16px; padding-top:16px; border-top:1px dashed #ccc;">
-            <button class="btn-secondary" style="width:100%; border-color:#2b6cb0; color:#2b6cb0;" onclick="generateClientLink()">🔗 產生客戶手機簽署連結</button>
-            <div id="link-result-container" style="display:none; margin-top:8px; background:#ebf8ff; padding:8px;">
-              <a id="client-link-href" href="#" target="_blank" style="font-size:12px; color:#3182ce;"></a>
-            </div>
+          <div class="form-group" style="border-top: 1px solid #E5E5E5; padding-top:16px;">
+            <label style="display:flex; justify-content:space-between;"><span>二、工作內容</span><button class="btn-secondary" onclick="addWorkItem('')">+ 新增更多區塊</button></label>
+            <div id="work-items-container"></div>
           </div>
+          <div class="form-group" style="border-top: 1px solid #E5E5E5; padding-top:16px;">
+            <label style="display:flex; justify-content:space-between;"><span>三、酬金及代墊費用</span><button class="btn-secondary" onclick="addFeeItem('')">+ 新增更多區塊</button></label>
+            <div id="fee-items-container"></div>
+          </div>
+          
+          <button class="btn-primary" id="btn-save-draft" onclick="handleSaveDraft()">💾 儲存合約資料</button>
         </div>
 
-        <!-- 現場線上簽署與預覽區 (原版保留) -->
         <div class="card">
-          <h3 style="margin-top: 0;">✍️ 線上簽署與預覽區</h3>
-          <button class="btn-secondary" style="width:100%; height:48px; border:2px dashed #111;" onclick="openSignatureModal()">✍️ 開啟簽名板</button>
-          <div id="signature-preview-container" style="display:none; margin-top:12px; text-align:center;">
-            <img id="signature-preview-img" src="" style="max-height:80px; border:1px solid #eee;">
+          <h3 style="margin-top: 0; color:#2b6cb0;">🔗 產生客戶專屬簽署連結</h3>
+          <p style="font-size:12px; color:#718096; margin-bottom:12px;">儲存合約後，點擊下方按鈕產生連結，將連結傳給客戶進行手機簽署。</p>
+          <button class="btn-secondary" style="width:100%; font-weight:bold; height:42px; color:#2b6cb0; border-color:#2b6cb0;" onclick="generateClientLink()">產生專屬簽署連結</button>
+          
+          <div id="link-result-container" style="display:none; margin-top:12px; background:#ebf8ff; padding:12px; border-radius:6px; word-break:break-all;">
+            <p style="font-size:12px; font-weight:bold; color:#2b6cb0; margin:0 0 4px 0;">請將此網址複製傳給客戶：</p>
+            <a id="client-link-href" href="#" target="_blank" style="font-size:13px; color:#3182ce;"></a>
           </div>
-          <button class="btn-primary" style="width:100%; background-color:#2563eb; margin-top:16px;" onclick="updateA4Preview()">🔍 預覽委任書 (含簽名)</button>
-        </div>
-
-        <!-- 原版 HTML A4 預覽區塊 (保留) -->
-        <div class="card" id="a4-inline-preview-card" style="display:none; padding:0; overflow:hidden;">
-          <div style="background:#111; color:#fff; padding:12px 16px; display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="margin:0; font-size:15px;">📄 委任書預覽與雲端建檔</h3>
-            <button class="btn-primary" style="background:#28a745;" onclick="uploadA4PDFToDrive()">📥 產生 PDF 並建檔</button>
-          </div>
-          <div class="a4-container-wrapper">
-            <div id="a4-preview-content" class="a4-container">
-              <h1 id="tpl-top-company" style="text-align: center; font-size: 26px;"></h1>
-              <h2 style="text-align: center;">委任書</h2>
-              <p>一、委任期間：<span id="tpl-period"></span></p>
-              <p>二、工作內容：</p><pre id="tpl-work" style="font-family:inherit; white-space:pre-wrap; margin-left:20px;"></pre>
-              <p>三、酬金及代墊費用：</p><pre id="tpl-fee" style="font-family:inherit; white-space:pre-wrap; margin-left:20px;"></pre>
-              <div style="margin-top: 40px; line-height: 2;">
-                <p>委任人：<span id="tpl-company"></span></p>
-                <p>代表人：<span id="tpl-rep"></span></p>
-                <div id="tpl-signature-wrapper" style="display:none;"><img id="tpl-signature" src="" style="max-height: 80px;"></div>
-                <p>合約日期：<span id="tpl-date"></span></p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 原版 Email 區塊 (保留) -->
-        <div class="card" id="email-section" style="display:none; margin-top: 16px; border: 1px solid #2563eb;">
-          <h3 style="margin-top: 0; color: #2563eb;">📧 寄發 Email (AI 特助)</h3>
-          <div class="form-group"><label>收件人 Email</label><input type="email" id="email-to" class="form-input"></div>
-          <div class="form-group">
-            <div style="display:flex; justify-content:space-between;">
-              <label>信件內容</label><button class="btn-secondary" style="color:#2563eb; border-color:#2563eb; padding:2px 6px;" onclick="generateEmailDraft()">✨ AI 撰寫</button>
-            </div>
-            <textarea id="email-body" class="form-input" rows="6"></textarea>
-          </div>
-          <button class="btn-primary" style="width:100%; background-color:#2563eb;" onclick="sendEmailAction()">🚀 發送 Email</button>
         </div>
       </div>
 
-      <!-- 02 歸檔與追蹤 -->
       <div id="tab2" class="tab-content">
         <div class="card">
-          <div style="display: flex; justify-content: space-between;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
             <h3 style="margin: 0;">需求與建檔時間軸</h3>
             <button class="btn-secondary" onclick="loadRequirements()">重新整理</button>
           </div>
-          <div id="timeline-list" style="margin-top:12px; font-size:13px; color:#888;">資料載入中...</div>
+          <div id="timeline-list" style="margin-top:12px; font-size:13px; color:#888; text-align:center;">載入中...</div>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // ⚠️ 發布後若網址有變更，請更新此處
-    const GAS_WEB_URL = "https://script.google.com/macros/s/AKfycbxKDzJ6CViZhgm75MLXmK9jO_ZM1Smo8Esy3wuj1JfD7PccBj4eNKp3TsLwKElRWmDb/exec";
-
     async function apiCall(action, payload) {
       const requestData = { action: action, payload: payload };
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        return await new Promise((resolve, reject) => { google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).processBackendRouting(requestData); });
-      } else {
-        const response = await fetch(GAS_WEB_URL, { method: 'POST', body: JSON.stringify(requestData) });
-        const res = await response.json(); if (res.status !== "success") throw new Error(res.message); return res.data; 
-      }
+      try {
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+          return await new Promise((resolve, reject) => {
+            google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).processBackendRouting(requestData); 
+          });
+        }
+      } catch (error) { throw error; }
     }
 
-    // 路由控制
     window.addEventListener('DOMContentLoaded', () => {
       if (URL_REQ_ID && URL_REQ_ID.trim() !== "") {
         document.getElementById('client-view').style.display = 'block';
         initClientSigningView(URL_REQ_ID);
       } else {
         document.getElementById('admin-view').style.display = 'block';
+        // 載入預設的自填字句
+        addWorkItem("(一) 每年會計帳務處理 \n(二) 其他各項稅務申報：\n1. 個人綜合所得稅申報。\n2. 各類所得扣繳申報（不含個別員工之薪資計算）。\n3. 每半年業務狀況調查表填寫。"); 
+        addFeeItem("(一) 每年各項業務處理費用：新台幣 19,800 元/每年簽約時收取。 \n(二) 其他服務（每年增收之工作酬金）： \n1.各類所得及股利憑單扣繳申報：新台幣 1600 元/每年簽約時收取。 \n2.綜合所得稅申報：新台幣 1600 元/簽約時收取。");
       }
     });
 
-    // ==================================
-    // 內部管理員邏輯 (保留原版所有功能)
-    // ==================================
+    let clientCanvas, clientCtx, clientDrawing = false;
+    
+    async function initClientSigningView(reqId) {
+      try {
+        const data = await apiCall('getContractByReqId', { reqId: reqId });
+        document.getElementById('cv-company-title').textContent = `${data.companyName} 委任書`;
+        document.getElementById('cv-period').textContent = data.period;
+        
+        const workDiv = document.getElementById('cv-work-items');
+        JSON.parse(data.workItemsJSON || "[]").forEach(item => { 
+          workDiv.innerHTML += `<div style="margin-bottom:12px;">${escapeHtml(item).replace(/\n/g, '<br>')}</div>`; 
+        });
+        
+        const feeDiv = document.getElementById('cv-fee-items');
+        JSON.parse(data.feeItemsJSON || "[]").forEach(item => { 
+          feeDiv.innerHTML += `<div style="margin-bottom:12px;">${escapeHtml(item).replace(/\n/g, '<br>')}</div>`; 
+        });
+
+        document.getElementById('cv-contract-content').style.display = 'block';
+        initClientSignaturePad();
+      } catch(err) {
+        document.getElementById('cv-company-title').textContent = "⚠️ 合約載入失敗";
+        alert(err.message);
+      }
+    }
+
+    function initClientSignaturePad() {
+      clientCanvas = document.getElementById('client-signature-pad');
+      if (!clientCanvas) return;
+      clientCtx = clientCanvas.getContext('2d');
+      const resize = () => { const rect = clientCanvas.parentElement.getBoundingClientRect(); clientCanvas.width = rect.width; clientCanvas.height = 250; clientCtx.lineWidth = 3; clientCtx.lineCap = "round"; clientCtx.strokeStyle = "#111111"; };
+      window.addEventListener('resize', resize); resize();
+      
+      const getPos = (e) => { const rect = clientCanvas.getBoundingClientRect(); let x = e.clientX, y = e.clientY; if (e.touches && e.touches.length > 0) { x = e.touches[0].clientX; y = e.touches[0].clientY; } return { x: x - rect.left, y: y - rect.top }; };
+      const start = (e) => { e.preventDefault(); clientDrawing = true; const p = getPos(e); clientCtx.beginPath(); clientCtx.moveTo(p.x, p.y); };
+      const draw = (e) => { if(!clientDrawing) return; e.preventDefault(); const p = getPos(e); clientCtx.lineTo(p.x, p.y); clientCtx.stroke(); };
+      const stop = (e) => { if(!clientDrawing) return; e.preventDefault(); clientDrawing = false; };
+      
+      clientCanvas.addEventListener('mousedown', start); clientCanvas.addEventListener('mousemove', draw); clientCanvas.addEventListener('mouseup', stop); clientCanvas.addEventListener('mouseout', stop);
+      clientCanvas.addEventListener('touchstart', start, {passive:false}); clientCanvas.addEventListener('touchmove', draw, {passive:false}); clientCanvas.addEventListener('touchend', stop, {passive:false});
+    }
+
+    function clearClientSignature() { if(clientCtx) clientCtx.clearRect(0, 0, clientCanvas.width, clientCanvas.height); }
+
+    async function submitClientContract() {
+      const blank = document.createElement('canvas'); blank.width = clientCanvas.width; blank.height = clientCanvas.height;
+      if (clientCanvas.toDataURL() === blank.toDataURL()) return alert("請先在簽名板上簽下您的姓名！");
+      
+      const btn = document.getElementById('btn-client-submit');
+      btn.disabled = true; btn.textContent = "合約存檔中，請稍候...";
+      
+      try {
+        const signatureBase64 = clientCanvas.toDataURL();
+        await apiCall('clientSubmitSignature', { reqId: URL_REQ_ID, signatureDataUri: signatureBase64 });
+        
+        document.getElementById('cv-contract-content').style.display = 'none';
+        document.getElementById('cv-success-msg').style.display = 'block';
+      } catch (err) {
+        alert("傳送失敗：" + err.message);
+        btn.disabled = false; btn.textContent = "確認簽署並送出合約";
+      }
+    }
+
     function switchTab(tabId) {
       document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -289,153 +275,94 @@
       if(tabId === 'tab2') loadRequirements();
     }
 
+    // 改用 textarea 讓多行文字編輯更順暢
+    function addWorkItem(content = '') {
+      const container = document.getElementById('work-items-container');
+      const div = document.createElement('div'); div.className = 'dynamic-item-row';
+      div.innerHTML = `<button type="button" class="btn-danger" style="position:absolute; right:12px; top:12px;" onclick="this.parentElement.remove()">刪除</button><div class="form-group" style="margin-right: 50px; margin-bottom: 0;"><textarea class="form-input item-work" rows="5">${escapeHtml(content)}</textarea></div>`;
+      container.appendChild(div);
+    }
+
+    function addFeeItem(content = '') {
+      const container = document.getElementById('fee-items-container');
+      const div = document.createElement('div'); div.className = 'dynamic-item-row';
+      div.innerHTML = `<button type="button" class="btn-danger" style="position:absolute; right:12px; top:12px;" onclick="this.parentElement.remove()">刪除</button><div class="form-group" style="margin-right: 50px; margin-bottom: 0;"><textarea class="form-input item-fee" rows="5">${escapeHtml(content)}</textarea></div>`;
+      container.appendChild(div);
+    }
+
     function getCommFormData() {
+      const workItems = []; document.querySelectorAll('.item-work').forEach(i => { if(i.value.trim()) workItems.push(i.value.trim()); });
+      const feeItems = []; document.querySelectorAll('.item-fee').forEach(i => { if(i.value.trim()) feeItems.push(i.value.trim()); });
       let signDateStr = ""; const rawDate = document.getElementById('comm-sign-date').value;
       if(rawDate) { const d = new Date(rawDate); signDateStr = `中華民國 ${d.getFullYear() - 1911} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`; }
+
       return {
-        reqId: document.getElementById('comm-req-id').value, _rowId: document.getElementById('comm-row-id').value,
-        companyName: document.getElementById('comm-company').value.trim(), rep: document.getElementById('comm-rep').value.trim(),
-        address: document.getElementById('comm-address').value.trim(), period: document.getElementById('comm-period').value.trim(),
-        phone: document.getElementById('comm-phone').value.trim(), signDate: signDateStr,
-        workContent: document.getElementById('comm-work').value, feeContent: document.getElementById('comm-fee').value
+        reqId: document.getElementById('comm-req-id').value,
+        companyName: document.getElementById('comm-company').value.trim(),
+        rep: document.getElementById('comm-rep').value.trim(),
+        address: document.getElementById('comm-address').value.trim(),
+        period: document.getElementById('comm-period').value.trim(),
+        phone: document.getElementById('comm-phone').value.trim(),
+        signDate: signDateStr, workItemsJSON: JSON.stringify(workItems), feeItemsJSON: JSON.stringify(feeItems)
       };
     }
 
     async function handleSaveDraft() {
       const data = getCommFormData();
       if (!data.companyName) return alert("請填寫公司名稱");
+      const btn = document.getElementById('btn-save-draft'); btn.disabled = true; btn.textContent = "儲存中...";
       try {
         const res = await apiCall('saveDraft', data);
-        document.getElementById('comm-row-id').value = res._rowId;
         document.getElementById('comm-req-id').value = res.reqId;
-        alert("✅ 儲存成功！");
-      } catch(err) { alert("儲存失敗：" + err.message); }
+        alert("✅ 儲存成功！現在可以產生連結給客戶了。");
+      } catch(err) { alert("儲存失敗：" + err.message); } 
+      finally { btn.disabled = false; btn.textContent = "💾 儲存合約資料"; }
     }
 
     function generateClientLink() {
       const reqId = document.getElementById('comm-req-id').value;
-      if(!reqId) return alert("請先點擊儲存！");
+      if(!reqId) return alert("請先點擊上方『儲存合約資料』，才能產生客戶連結！");
+      
       if (typeof google !== 'undefined' && google.script) {
-        google.script.url.getLocation(function(loc) {
-           let finalLink = `${loc.href.split('?')[0]}?reqId=${reqId}`;
-           document.getElementById('client-link-href').href = finalLink; document.getElementById('client-link-href').textContent = finalLink;
+        google.script.url.getLocation(function(location) {
+           let cleanUrl = location.href.split('?')[0]; 
+           let finalLink = `${cleanUrl}?reqId=${reqId}`;
+           const aTag = document.getElementById('client-link-href');
+           aTag.href = finalLink;
+           aTag.textContent = finalLink;
            document.getElementById('link-result-container').style.display = 'block';
         });
       }
     }
 
-    // 保留原本的預覽與 Email
-    function updateA4Preview() {
-      const data = getCommFormData();
-      document.getElementById('tpl-top-company').textContent = data.companyName;
-      document.getElementById('tpl-period').textContent = data.period;
-      document.getElementById('tpl-work').textContent = data.workContent;
-      document.getElementById('tpl-fee').textContent = data.feeContent;
-      document.getElementById('tpl-company').textContent = data.companyName;
-      document.getElementById('tpl-rep').textContent = data.rep;
-      document.getElementById('tpl-date').textContent = data.signDate;
-      const previewImg = document.getElementById('signature-preview-img');
-      if (previewImg.src && previewImg.src.indexOf('data:image') !== -1) {
-        document.getElementById('tpl-signature').src = previewImg.src; document.getElementById('tpl-signature-wrapper').style.display = 'block';
-      }
-      document.getElementById('a4-inline-preview-card').style.display = 'block';
-      document.getElementById('email-section').style.display = 'block';
-    }
-
-    async function uploadA4PDFToDrive() {
-      const data = getCommFormData();
-      const previewImg = document.getElementById('signature-preview-img');
-      if (previewImg.src && previewImg.src.indexOf('data:image') !== -1) data.signatureDataUri = previewImg.src;
-      try {
-        await apiCall('saveDraft', data);
-        const uploadRes = await apiCall('generateAndUploadPDF', data);
-        alert(`✅ PDF 已建檔！\n連結：${uploadRes.fileUrl}`);
-      } catch (err) { alert(`建檔失敗：${err.message}`); }
-    }
-
-    async function generateEmailDraft() {
-      const data = getCommFormData();
-      try { const res = await apiCall('generateEmailContent', data); document.getElementById('email-body').value = res.emailBody; } 
-      catch (err) { alert("產生失敗：" + err.message); }
-    }
-
-    async function sendEmailAction() {
-      const payload = { reqId: document.getElementById('comm-req-id').value, toEmail: document.getElementById('email-to').value, subject: "報價單", body: document.getElementById('email-body').value };
-      try { await apiCall('sendQuoteEmail', payload); alert("發送成功！"); } catch(e) { alert("發送失敗: " + e.message); }
-    }
-
     async function loadRequirements() {
+      const timelineEl = document.getElementById('timeline-list');
+      timelineEl.innerHTML = '載入中...';
       try { 
         const reqs = await apiCall('getRequirements', {}); 
-        document.getElementById('timeline-list').innerHTML = reqs.map(r => `<div class="timeline-item"><div class="timeline-card"><b>${r.companyName}</b><br><a href="javascript:void(0)" onclick='reverseEditForm(${JSON.stringify(r).replace(/'/g, "&apos;")})'>✏️ 帶入 01 區修改</a></div></div>`).join('');
-      } catch (err) { }
+        timelineEl.innerHTML = reqs.length === 0 ? '無資料' : reqs.map(r => `<div style="border-bottom:1px solid #eee; padding:10px; text-align:left;"><b>${r.companyName}</b><br>單號: ${r.reqId}<br>狀態: ${r.status || '建檔中'}<br><a href="javascript:void(0)" onclick='reverseEditForm(${JSON.stringify(r).replace(/'/g, "&apos;")})'>✏️ 載入修改</a></div>`).join('');
+      } catch (err) { timelineEl.innerHTML = '載入失敗'; }
     }
 
     function reverseEditForm(item) {
       switchTab('tab1');
-      document.getElementById('comm-req-id').value = item.reqId || ''; document.getElementById('comm-row-id').value = item._rowId || '';
-      document.getElementById('comm-company').value = item.companyName || ''; document.getElementById('comm-rep').value = item.customerName || '';
-      document.getElementById('comm-address').value = item.address || ''; document.getElementById('comm-period').value = item.period || '';
-      document.getElementById('comm-phone').value = item.phone || ''; document.getElementById('comm-work').value = item.workContent || '';
-      document.getElementById('comm-fee').value = item.feeContent || '';
-    }
-
-    async function handleSimulateLineMsg() {
-      const rawText = document.getElementById('line-input').value.trim();
-      if (!rawText) return;
-      try { await apiCall('simulateLineMessage', { rawText }); alert('解析完成！'); } catch (err) { alert('失敗'); }
-    }
-
-    // ==================================
-    // 畫布邏輯 (包含管理員與客戶)
-    // ==================================
-    let adminCanvas, adminCtx, adminDrawing = false;
-    let clientCanvas, clientCtx, clientDrawing = false;
-
-    function openSignatureModal() { document.getElementById('signature-modal').style.display = 'flex'; setTimeout(initAdminCanvas, 100); }
-    function closeSignatureModal() { document.getElementById('signature-modal').style.display = 'none'; }
-    function clearSignature() { if(adminCtx) adminCtx.clearRect(0,0,adminCanvas.width,adminCanvas.height); }
-    function confirmSignature() { document.getElementById('signature-preview-img').src = adminCanvas.toDataURL(); document.getElementById('signature-preview-container').style.display = 'block'; closeSignatureModal(); }
-
-    function setupCanvas(canvasId, isClient) {
-      const cvs = document.getElementById(canvasId); if (!cvs) return null;
-      const ctx = cvs.getContext('2d');
-      const resize = () => { cvs.width = cvs.parentElement.getBoundingClientRect().width; cvs.height = 200; ctx.lineWidth = 3; ctx.lineCap = "round"; };
-      window.addEventListener('resize', resize); resize();
-      const getPos = (e) => { const r = cvs.getBoundingClientRect(); let x = e.clientX, y = e.clientY; if(e.touches){ x = e.touches[0].clientX; y = e.touches[0].clientY; } return {x: x-r.left, y: y-r.top}; };
-      cvs.addEventListener('mousedown', (e)=>{ e.preventDefault(); if(isClient) clientDrawing=true; else adminDrawing=true; ctx.beginPath(); const p=getPos(e); ctx.moveTo(p.x,p.y); });
-      cvs.addEventListener('mousemove', (e)=>{ e.preventDefault(); if((isClient && !clientDrawing) || (!isClient && !adminDrawing)) return; const p=getPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); });
-      const stop = (e)=>{ e.preventDefault(); if(isClient) clientDrawing=false; else adminDrawing=false; };
-      cvs.addEventListener('mouseup', stop); cvs.addEventListener('mouseout', stop);
-      cvs.addEventListener('touchstart', (e)=>{ e.preventDefault(); if(isClient) clientDrawing=true; else adminDrawing=true; ctx.beginPath(); const p=getPos(e); ctx.moveTo(p.x,p.y); }, {passive:false});
-      cvs.addEventListener('touchmove', (e)=>{ e.preventDefault(); if((isClient && !clientDrawing) || (!isClient && !adminDrawing)) return; const p=getPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); }, {passive:false});
-      cvs.addEventListener('touchend', stop, {passive:false});
-      return {cvs, ctx};
-    }
-    function initAdminCanvas() { const r = setupCanvas('signature-pad', false); adminCanvas = r.cvs; adminCtx = r.ctx; }
-
-    async function initClientSigningView(reqId) {
+      document.getElementById('comm-req-id').value = item.reqId || '';
+      document.getElementById('comm-company').value = item.companyName || '';
+      document.getElementById('comm-rep').value = item.rep || '';
+      document.getElementById('comm-address').value = item.address || '';
+      document.getElementById('comm-period').value = item.period || '';
+      document.getElementById('comm-phone').value = item.phone || '';
+      document.getElementById('work-items-container').innerHTML = '';
+      document.getElementById('fee-items-container').innerHTML = '';
       try {
-        const data = await apiCall('getContractByReqId', { reqId: reqId });
-        document.getElementById('cv-company-title').textContent = `${data.companyName} 委任書`;
-        document.getElementById('cv-period').textContent = data.period;
-        document.getElementById('cv-work-items').textContent = data.workContent;
-        document.getElementById('cv-fee-items').textContent = data.feeContent;
-        document.getElementById('cv-contract-content').style.display = 'block';
-        const r = setupCanvas('client-signature-pad', true); clientCanvas = r.cvs; clientCtx = r.ctx;
-      } catch(err) { document.getElementById('cv-company-title').textContent = "⚠️ 載入失敗"; }
+        JSON.parse(item.workItemsJSON || "[]").forEach(w => addWorkItem(w));
+        JSON.parse(item.feeItemsJSON || "[]").forEach(f => addFeeItem(f));
+      } catch(e) {}
+      if(document.getElementById('work-items-container').children.length === 0) addWorkItem('');
+      if(document.getElementById('fee-items-container').children.length === 0) addFeeItem('');
+      document.getElementById('link-result-container').style.display = 'none';
     }
-    function clearClientSignature() { if(clientCtx) clientCtx.clearRect(0,0,clientCanvas.width,clientCanvas.height); }
 
-    async function submitClientContract() {
-      const blank = document.createElement('canvas'); blank.width = clientCanvas.width; blank.height = clientCanvas.height;
-      if (clientCanvas.toDataURL() === blank.toDataURL()) return alert("請簽名！");
-      document.getElementById('btn-client-submit').disabled = true;
-      try {
-        await apiCall('clientSubmitSignature', { reqId: URL_REQ_ID, signatureDataUri: clientCanvas.toDataURL() });
-        document.getElementById('cv-contract-content').style.display = 'none'; document.getElementById('cv-success-msg').style.display = 'block';
-      } catch (err) { alert("傳送失敗：" + err.message); document.getElementById('btn-client-submit').disabled = false; }
-    }
     function escapeHtml(str) { if (!str) return ''; return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
   </script>
 </body>
