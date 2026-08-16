@@ -20,110 +20,62 @@
     .tab-content.active { display: block; animation: fadeIn 0.3s; }
     
     .card { background-color: #FFFFFF; border: 1px solid #E5E5E5; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-    .btn-primary { background-color: #111111; color: #FFFFFF; border: none; border-radius: 6px; padding: 0 16px; height: 42px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; width: 100%; }
+    .btn-primary { background-color: #111111; color: #FFFFFF; border: none; border-radius: 6px; padding: 0 16px; height: 42px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .btn-primary:disabled { background-color: #A0AEC0; cursor: not-allowed; }
-    .btn-secondary { background-color: #FFFFFF; color: #111111; border: 1px solid #CBD5E0; border-radius: 4px; padding: 6px 12px; cursor: pointer; font-size: 13px; }
-    .btn-danger { background-color: #E53E3E; color: white; border: none; border-radius: 4px; padding: 4px 10px; font-size: 12px; cursor: pointer; }
-
+    .btn-secondary { background-color: #FFFFFF; color: #111111; border: 1px solid #CBD5E0; border-radius: 6px; padding: 0 16px; height: 42px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-secondary:disabled { background-color: #E2E8F0; color: #A0AEC0; cursor: not-allowed; }
+    
     .form-group { margin-bottom: 16px; }
     .form-group label { display: block; font-size: 13px; font-weight: 600; color: #4A5568; margin-bottom: 6px; }
     .form-input { width: 100%; padding: 10px; border: 1px solid #E2E8F0; border-radius: 6px; font-size: 14px; background-color: #F8FAFC; }
-    .dynamic-item-row { background: #FFFFFF; border: 1px dashed #CBD5E0; padding: 12px; border-radius: 6px; margin-bottom: 12px; position: relative; }
+    textarea.form-input { resize: vertical; min-height: 80px; line-height: 1.5; }
+    textarea.readonly-bg { background-color: #EDF2F7; }
 
     /* 客戶專屬線上簽署 A4 視圖樣式 */
     #client-view { display: none; padding: 20px 10px; min-height: 100vh; background-color: #E2E8F0; }
-    .a4-paper { background: #FFFFFF; max-width: 800px; margin: 0 auto; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 30px; font-size: 15px; line-height: 1.8; color: #2D3748; overflow: hidden; }
-    .a4-paper h1 { text-align: center; font-size: 22px; color: #1A202C; margin-bottom: 30px; border-bottom: 2px solid #E2E8F0; padding-bottom: 10px; }
-    .a4-section { margin-bottom: 20px; }
-    .a4-title { font-weight: bold; font-size: 16px; margin-bottom: 8px; color: #2D3748; }
-    .a4-list { padding-left: 20px; margin: 0; }
+    .a4-paper { background: #FFFFFF; max-width: 800px; margin: 0 auto; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 30px; font-size: 15px; line-height: 1.8; color: #2D3748; overflow: hidden; white-space: pre-wrap; }
+    .a4-paper h1 { text-align: center; font-size: 22px; color: #1A202C; margin-bottom: 30px; border-bottom: 2px solid #E2E8F0; padding-bottom: 10px; white-space: normal; }
     
-    .signature-area { margin-top: 30px; border-top: 2px dashed #E2E8F0; padding-top: 20px; }
+    .signature-area { margin-top: 30px; border-top: 2px dashed #E2E8F0; padding-top: 20px; white-space: normal; }
     .signature-pad-wrapper { border: 1px solid #CBD5E0; border-radius: 8px; background: #F8FAFC; overflow: hidden; position: relative; touch-action: none; margin-bottom: 16px; }
     #client-signature-pad { width: 100%; height: 250px; cursor: crosshair; }
     .sign-clear-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.9); border: 1px solid #E2E8F0; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; }
 
+    .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   </style>
 </head>
 <body>
 
-  <!-- GAS 傳遞過來的變數 -->
   <script>
     const URL_REQ_ID = "<?= clientReqId ?>";
   </script>
 
   <!-- ========================================== -->
-  <!-- 視圖 1：客戶線上簽署專用 A4 畫面 (不可編輯文字) -->
+  <!-- 視圖 1：客戶線上簽署專用 A4 畫面 (純唯讀 HTML) -->
   <!-- ========================================== -->
   <div id="client-view">
     <div class="a4-paper">
-      <h1 id="cv-company-title">載入合約中...</h1>
+      <h1 id="cv-title">載入合約中...</h1>
       
       <div id="cv-contract-content" style="display:none; animation: fadeIn 0.5s;">
-        <p>主旨：承 貴公司委任智律會計師事務所（以下簡稱本事務所）辦理公司會計帳務處理、各項稅務之申報相關作業等服務，謹開列下列工作範圍及條件，請查照惠予同意並賜復。</p>
-        <p>說明：</p>
-        <div class="a4-section">
-          <div class="a4-title">一、委任方法：</div>
-          <p style="margin:0;">本事務所將依據財政部發布之「所得稅法」相關規定，辦理會計帳務處理，並提供有關之諮詢服務。</p>
-        </div>
-        
-        <div class="a4-section">
-          <div class="a4-title">二、【工作內容】：</div>
-          <ul class="a4-list" id="cv-work-items"></ul>
-          <p style="margin-top: 8px; font-size: 14px;">為順利達成上列工作，貴公司應提供應有之文件、憑證，並答覆有關問題之詢問；每期營業稅申報日截止前十日（即單數月五日以前），貴公司應交付相關憑證供本事務所整理申報。對貴公司所提供之一切資料本事務所均將嚴守秘密，惟當業務事件主管機關依法向本事務所查詢或調閱有關之工作底稿時，本事務所不得拒絕或規避。</p>
-        </div>
-        
-        <div class="a4-section">
-          <div class="a4-title">三、【酬金及代墊費用】：</div>
-          <p style="margin:0;">第二條所列之工作內容之委任酬金如下：</p>
-          <ul class="a4-list" id="cv-fee-items"></ul>
-          <p style="margin-top: 8px; font-size: 14px;">各項規費、稅金、郵資、交通費、代刻印鑑、代購發票及其他因提供服務而發生之代墊費用，應由貴公司負擔。代墊費用將由本事務所按實際發生金額製據向 貴公司收取，貴公司應於收到本事務所請款單據時，以即期支票、現金或電匯本事務所指定帳戶之方式支付酬金。各項稅金之代繳，貴公司應於該稅金繳納截止日之前一天，連同服務酬金一併支付。本事務所恕不代墊稅金。<br><br>委任酬金之調整，視貴公司營業額成長，或委任事務增加或帳務日益繁複時，本事務所得要求調整委任酬金。委任酬金之調整，委任事務所可就實際工作內容及帳務繁複程度，本事務所得要求調整委任酬金且須經雙方合意始得進行。</p>
-        </div>
-        
-        <div class="a4-section">
-          <div class="a4-title">四、【委任期間】：</div>
-          <p style="margin:0;" id="cv-period"></p>
-        </div>
-
-        <div class="a4-section">
-          <div class="a4-title">五、終止委任：</div>
-          <p style="margin:0; font-size: 14px;">
-            (一) 任一方若欲終止委任，應於委任終止前十日以書面方式告知他方。<br>
-            (二) 貴公司如未能於本事務所指定之期限提交相關憑證，或延遲給付酬金達二個月或所提交之帳證文據虛偽不實，本事務所得以書面通知委任人終止其委任合約。<br>
-            (三) 本事務所應於委任終止後三十日內將貴公司之各項憑證、文件、帳冊、報表列冊交還貴公司，貴公司有收受領回之義務，不得拒絕，如有應付未付酬金及代墊費用，貴公司仍應支付。
-          </p>
-        </div>
-
-        <div class="a4-section">
-          <div class="a4-title">六、其他約定事項：</div>
-          <p style="margin:0; font-size: 14px;">
-            (一) 委任人深知提供足以公正表達公司財務狀況、營業結果、課稅所得額之憑證及攸關資料，乃委任人之責任，若因提供不實或不完整的資料及憑證，致使受任人遭受有形及（或）無形損失時，其一切法律責任及損失由委任人負責之。<br>
-            (二) 除經法院判決確定係受任人之故意或重大過失，受任人因提供本委任書之服務，無論其原因為何，受任人對委任人之最高賠償責任限於返還受任人因提供該項服務或工作成果已收取之公費；倘有任何其他第三人因此向受任人主張任何權利者，無論其原因為何，委任人同意補償並確保受任人及受任人之人員不遭受任何索賠、責任、費用及損失。<br>
-            (三) 受任人對職務上所獲悉有關委任人經營上之機密應盡保密之責，如有洩密願負法律之責任。<br>
-            (四) 本事務所若無法與貴公司取得聯絡，致無法繼續辦理委任範圍事項，本事務所應按本函記載之地址書面通知貴公司並限期回覆，貴公司若未於期限內回覆，本事務所僅自限期之次日起二個月內保管貴公司之相關資料，其一切法律責任由 貴公司自負。<br>
-            (五) 若 貴公司之各稅目有國稅局選案查核之情事，本事務所將視相關補充說明及文件準備所需增加投入之時間，另行報價收費。<br>
-            (六) 本委任書不含進銷存貨、營業成本與營業收入勾稽等相關報表編製服務，貴公司若因內部需求或主管機關要求需提供時，本事務所將視相關工作時間，另行報價收費。<br>
-            (七) 委任人若不於各項申報日規定期限日前提供受任人所指定之各項憑證、表報等資料，因而造成遲報滯報時，受任人不須負責。<br>
-            (八) 若後續服務之範圍或內容與本委任書不一致，將與委任人管理階層就異動內容達成共識，並以委任書或其他適當形式之書面協議予以約定，以釐清雙方之權利義務。<br>
-            (九) 茲致送本函兩份，如承蒙 貴公司同意由本事務所依本函條款進行服務，請於本函下端簽署。
-          </p>
-        </div>
+        <div id="cv-text-body"></div>
         
         <!-- 簽署區域 -->
         <div class="signature-area">
           <h3 style="margin-top: 0; color: #2D3748;">✍️ 委任方 (客戶) 線上簽署區</h3>
-          <p style="font-size: 13px; color: #718096; margin-bottom: 12px;">茲同意本函所述各點。請在下方空白處簽下您的姓名：</p>
+          <p style="font-size: 13px; color: #718096; margin-bottom: 12px;">茲同意本函所述各點，請在下方空白處簽名：</p>
           <div class="signature-pad-wrapper">
             <button class="sign-clear-btn" onclick="clearClientSignature()">🗑️ 清除重簽</button>
             <canvas id="client-signature-pad"></canvas>
           </div>
-          <button class="btn-primary" id="btn-client-submit" onclick="submitClientContract()">確認簽署並送出合約</button>
+          <button class="btn-primary" id="btn-client-submit" onclick="submitClientContract()">確認簽署並送出</button>
         </div>
       </div>
       
       <!-- 簽署成功畫面 -->
-      <div id="cv-success-msg" style="display:none; text-align:center; padding: 40px 0;">
+      <div id="cv-success-msg" style="display:none; text-align:center; padding: 40px 0; white-space: normal;">
         <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
         <h2 style="color: #28a745; margin-bottom: 8px;">簽署完成！</h2>
         <p style="color: #4A5568;">我們已經收到您的簽署憑證，並將正式合約存檔。</p>
@@ -132,7 +84,7 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- 視圖 2：內部管理員系統 (新版範本介面) -->
+  <!-- 視圖 2：內部管理員系統 (01區 Textarea 版) -->
   <!-- ========================================== -->
   <div id="admin-view" style="display: none;">
     <nav><h1>智嵂報價特助 (管理後台)</h1></nav>
@@ -144,50 +96,80 @@
     <div class="container">
       <div id="tab1" class="tab-content active">
         <div class="card">
-          <h3 style="margin-top: 0;">📄 代理帳務委任書建檔</h3>
+          <h3 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px;">📄 代理帳務委任書建檔 (範本模式)</h3>
           <input type="hidden" id="comm-req-id">
           <input type="hidden" id="comm-row-id">
           
           <div style="display: flex; gap: 8px;">
-            <div class="form-group" style="flex: 1;"><label>公司名稱</label><input type="text" id="comm-company" class="form-input"></div>
+            <div class="form-group" style="flex: 1;"><label>客戶名稱</label><input type="text" id="comm-company" class="form-input"></div>
             <div class="form-group" style="flex: 1;"><label>代表人</label><input type="text" id="comm-rep" class="form-input"></div>
           </div>
-          <div class="form-group"><label>地址</label><input type="text" id="comm-address" class="form-input"></div>
+          <div class="form-group"><label>公司地址</label><input type="text" id="comm-address" class="form-input"></div>
           <div style="display: flex; gap: 8px;">
-            <div class="form-group" style="flex: 1;"><label>電話</label><input type="text" id="comm-phone" class="form-input"></div>
-            <div class="form-group" style="flex: 1;"><label>委任期間</label><input type="text" id="comm-period" class="form-input" placeholder="例：自2026年1月01日至2026年12月31日起"></div>
+            <div class="form-group" style="flex: 1;"><label>連絡電話</label><input type="text" id="comm-phone" class="form-input"></div>
+            <div class="form-group" style="flex: 1;"><label>合約書簽署日期</label><input type="date" id="comm-sign-date" class="form-input"></div>
           </div>
-          <div class="form-group" style="margin-top: 8px;"><label>合約書簽署日期</label><input type="date" id="comm-sign-date" class="form-input"></div>
+          <div class="form-group"><label>委任期間</label><input type="text" id="comm-period" class="form-input" placeholder="例：自 2026 年 1 月 01 日至 2026 年 12 月 31 日起"></div>
           
-          <div class="form-group" style="border-top: 1px solid #E5E5E5; padding-top:16px;">
-            <label style="display:flex; justify-content:space-between;"><span>二、工作內容</span><button class="btn-secondary" onclick="addWorkItem()">+ 新增</button></label>
-            <div id="work-items-container"></div>
-          </div>
-          <div class="form-group" style="border-top: 1px solid #E5E5E5; padding-top:16px;">
-            <label style="display:flex; justify-content:space-between;"><span>三、酬金及代墊費用</span><button class="btn-secondary" onclick="addFeeItem()">+ 新增</button></label>
-            <div id="fee-items-container"></div>
-          </div>
+          <div class="form-group"><label>主旨 (可編輯)</label><textarea id="txt-subject" class="form-input">承 貴公司委任智律會計師事務所（以下簡稱本事務所）辦理公司會計帳務處理、各項稅務之申報相關作業等服務，謹開列下列工作範圍及條件，請查照惠予同意並賜復。</textarea></div>
+          <div class="form-group"><label>一、委任方法 (可編輯)</label><textarea id="txt-method" class="form-input">本事務所將依據財政部發布之「所得稅法」相關規定，辦理會計帳務處理，並提供有關之諮詢服務。</textarea></div>
           
-          <button class="btn-primary" id="btn-save-draft" onclick="handleSaveDraft()">💾 儲存合約資料</button>
+          <div class="form-group"><label>二、【工作內容】 - 自填區塊</label><textarea id="txt-work-custom" class="form-input" placeholder="請填寫工作內容，可自行換行..."></textarea></div>
+          <div class="form-group"><label>二、【工作內容】 - 預設後綴</label><textarea id="txt-work-default" class="form-input readonly-bg">為順利達成上列工作，貴公司應提供應有之文件、憑證，並答覆有關問題之詢問；每期營業稅申報日截止前十日（即單數月五日以前），貴公司應交付相關憑證供本事務所整理申報。對貴公司所提供之一切資料本事務所均將嚴守秘密，惟當業務事件主管機關依法向本事務所查詢或調閱有關之工作底稿時，本事務所不得拒絕或規避。</textarea></div>
+          
+          <div class="form-group"><label>三、【酬金及代墊費用】 - 預設前綴</label><textarea id="txt-fee-prefix" class="form-input readonly-bg" rows="2">第二條所列之工作內容之委任酬金如下：</textarea></div>
+          <div class="form-group"><label>三、【酬金及代墊費用】 - 自填區塊</label><textarea id="txt-fee-custom" class="form-input" placeholder="請填寫酬金內容，可自行換行..."></textarea></div>
+          <div class="form-group"><label>三、【酬金及代墊費用】 - 預設後綴</label><textarea id="txt-fee-suffix" class="form-input readonly-bg" rows="6">各項規費、稅金、郵資、交通費、代刻印鑑、代購發票及其他因提供服務而發生之代墊費用，應由貴公司負擔。代墊費用將由本事務所按實際發生金額製據向 貴公司收取，貴公司應於收到本事務所請款單據時，以即期支票、現金或電匯本事務所指定帳戶之方式支付酬金。各項稅金之代繳，貴公司應於該稅金繳納截止日之前一天，連同服務酬金一併支付。本事務所恕不代墊稅金。委任酬金之調整，視貴公司營業額成長，或委任事務增加或帳務日益繁複時，本事務所得要求調整委任酬金。
+委任酬金之調整，委任事務所可就實際工作內容及帳務繁複程度，本事務所得要求調整委任酬金且須經雙方合意始得進行。</textarea></div>
+          
+          <div class="form-group"><label>五、終止委任 (可編輯)</label><textarea id="txt-termination" class="form-input readonly-bg" rows="5">(一) 任一方若欲終止委任，應於委任終止前十日以書面方式告知他方。 
+(二) 貴公司如未能於本事務所指定之期限提交相關憑證，或延遲給付酬金達二個月或所提交之帳證文據虛偽不實，本事務所得以書面通知委任人終止其委任合約。 
+(三) 本事務所應於委任終止後三十日內將貴公司之各項憑證、文件、帳冊、報表列冊交還貴公司，貴公司有收受領回之義務，不得拒絕，如有應付未付酬金及代墊費用，貴公司仍應支付。</textarea></div>
+
+          <div class="form-group"><label>六、其他約定事項 (可編輯)</label><textarea id="txt-other-terms" class="form-input readonly-bg" rows="10">(一) 委任人深知提供足以公正表達公司財務狀況、營業結果、課稅所得額之憑證及攸關資料，乃委任人之責任，若因提供不實或不完整的資料及憑證，致使受任人遭受有形及（或）無形損失時，其一切法律責任及損失由委任人負責之。
+(二) 除經法院判決確定係受任人之故意或重大過失，受任人因提供本委任書之服務，無論其原因為何，受任人對委任人之最高賠償責任限於返還受任人因提供該項服務或工作成果已收取之公費；倘有任何其他第三人因此向受任人主張任何權利者，無論其原因為何，委任人同意補償並確保受任人及受任人之人員不遭受任何索賠、責任、費用及損失。
+(三) 受任人對職務上所獲悉有關委任人經營上(包括營業、技術、財務、人事等)之機密應盡保密之責，如有洩密願負法律之責任。
+(四) 本事務所若無法與貴公司取得聯絡，致無法繼續辦理委任範圍事項，本事務所應按本函記載之地址書面通知貴公司並限期回覆，貴公司若未於期限內回覆，本事務所僅自限期之次日起二個月內保管貴公司之相關資料，其一切法律責任由 貴公司自負。
+(五) 若 貴公司之各稅目有國稅局選案查核之情事，本事務所將視相關補充說明及文件準備所需增加投入之時間，另行報價收費。
+(六) 本委任書不含進銷存貨、營業成本與營業收入勾稽等相關報表編製服務，貴公司若因公司內部需求或主管機關要求需提供時，本事務所將視相關工作時間，另行報價收費。
+(七) 委任人若不於各項申報日規定期限日前提供受任人所指定之各項憑證、表報等資料，因而造成遲報滯報時，受任人不須負責。
+(八) 若後續服務之範圍或內容與本委任書不一致，將與委任人管理階層就異動內容達成共識，並以委任書或其他適當形式之書面協議予以約定，以釐清雙方之權利義務。
+(九) 茲致送本函兩份，如承蒙 貴公司同意由本事務所依本函條款進行服務，請於本函下端簽章後，將其中壹份寄回本事務所。</textarea></div>
+          
+          <div class="action-grid">
+            <button class="btn-primary" id="btn-save-draft" onclick="handleSaveDraft()">💾 儲存資料</button>
+            <button class="btn-secondary" id="btn-preview-pdf" onclick="handlePreviewPDF()">📄 預覽產生 PDF</button>
+          </div>
         </div>
 
-        <div class="card">
-          <h3 style="margin-top: 0; color:#2b6cb0;">🔗 產生客戶專屬簽署連結</h3>
-          <p style="font-size:12px; color:#718096; margin-bottom:12px;">儲存合約後，點擊下方按鈕產生連結，將連結傳給客戶進行手機簽署。</p>
-          <button class="btn-secondary" style="width:100%; font-weight:bold; height:42px; color:#2b6cb0; border-color:#2b6cb0;" onclick="generateClientLink()">產生專屬簽署連結</button>
-          
-          <div id="link-result-container" style="display:none; margin-top:12px; background:#ebf8ff; padding:12px; border-radius:6px; word-break:break-all;">
+        <div class="card" id="email-section" style="background-color: #F0F4F8; border-color: #CBD5E0;">
+          <h3 style="margin-top: 0; border-bottom: 1px solid #CBD5E0; padding-bottom: 10px;">📧 寄發 Email 報價與簽署連結</h3>
+          <div class="form-group">
+            <label>收件人 Email</label>
+            <input type="text" id="email-to" class="form-input" placeholder="客戶的 Email 信箱">
+          </div>
+          <div class="form-group">
+            <label>夾帶額外附件 (可複選)</label>
+            <input type="file" id="email-extra-files" class="form-input" multiple style="padding: 6px;">
+            <p style="font-size: 12px; color: #718096; margin-top: 4px;">系統會自動將您剛剛預覽生成的「委任書PDF」作為第一份附件。您可在此上傳其他參考檔案。</p>
+          </div>
+          <div class="action-grid">
+            <button class="btn-primary" style="background-color: #2b6cb0;" id="btn-send-email" onclick="handleSendEmail()">📤 寄發 Email</button>
+            <button class="btn-secondary" style="color: #2b6cb0; border-color: #2b6cb0;" onclick="generateClientLink()">🔗 僅產生線上簽署連結</button>
+          </div>
+          <div id="link-result-container" style="display:none; margin-top:12px; background:#FFFFFF; padding:12px; border-radius:6px; border: 1px dashed #2b6cb0; word-break:break-all;">
             <p style="font-size:12px; font-weight:bold; color:#2b6cb0; margin:0 0 4px 0;">請將此網址複製傳給客戶：</p>
             <a id="client-link-href" href="#" target="_blank" style="font-size:13px; color:#3182ce;"></a>
           </div>
         </div>
       </div>
 
+      <!-- 02 歸檔與追蹤 (保留不動) -->
       <div id="tab2" class="tab-content">
         <div class="card">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <h3 style="margin: 0;">需求與建檔時間軸</h3>
-            <button class="btn-secondary" onclick="loadRequirements()">重新整理</button>
+            <button class="btn-secondary" style="width:auto;" onclick="loadRequirements()">重新整理</button>
           </div>
           <div id="timeline-list" style="margin-top:12px; font-size:13px; color:#888; text-align:center;">載入中...</div>
         </div>
@@ -213,27 +195,35 @@
         initClientSigningView(URL_REQ_ID);
       } else {
         document.getElementById('admin-view').style.display = 'block';
-        addWorkItem(); addFeeItem();
       }
     });
 
+    // ==========================================
+    // 客戶端：純唯讀 HTML 渲染與簽名板
+    // ==========================================
     let clientCanvas, clientCtx, clientDrawing = false;
     
     async function initClientSigningView(reqId) {
       try {
         const data = await apiCall('getContractByReqId', { reqId: reqId });
-        document.getElementById('cv-company-title').textContent = `${data.companyName} 委任書`;
-        document.getElementById('cv-period').textContent = data.period;
+        let company = escapeHtml(data.companyName);
+        document.getElementById('cv-title').textContent = `${company} 委任書`;
         
-        const workUl = document.getElementById('cv-work-items');
-        JSON.parse(data.workItemsJSON || "[]").forEach(item => { workUl.innerHTML += `<li style="margin-bottom:6px;">${escapeHtml(item)}</li>`; });
-        const feeUl = document.getElementById('cv-fee-items');
-        JSON.parse(data.feeItemsJSON || "[]").forEach(item => { feeUl.innerHTML += `<li style="margin-bottom:6px;">${escapeHtml(item)}</li>`; });
-
+        let contentHTML = `
+          <p>主旨：<br>${escapeHtml(data.subject)}</p>
+          <p>說明：</p>
+          <p><b>一、委任方法：</b><br>${escapeHtml(data.method)}</p>
+          <p><b>二、【工作內容】：</b><br>${escapeHtml(data.workCustom)}<br><br>${escapeHtml(data.workDefault)}</p>
+          <p><b>三、【酬金及代墊費用】</b><br>${escapeHtml(data.feePrefix)}<br>${escapeHtml(data.feeCustom)}<br><br>${escapeHtml(data.feeSuffix)}</p>
+          <p><b>四、【委任期間】：</b><br>${escapeHtml(data.period)}</p>
+          <p><b>五、終止委任：</b><br>${escapeHtml(data.termination)}</p>
+          <p><b>六、其他約定事項：</b><br>${escapeHtml(data.otherTerms)}</p>
+        `;
+        document.getElementById('cv-text-body').innerHTML = contentHTML;
         document.getElementById('cv-contract-content').style.display = 'block';
         initClientSignaturePad();
       } catch(err) {
-        document.getElementById('cv-company-title').textContent = "⚠️ 合約載入失敗";
+        document.getElementById('cv-title').textContent = "⚠️ 合約載入失敗";
         alert(err.message);
       }
     }
@@ -266,15 +256,17 @@
       try {
         const signatureBase64 = clientCanvas.toDataURL();
         await apiCall('clientSubmitSignature', { reqId: URL_REQ_ID, signatureDataUri: signatureBase64 });
-        
         document.getElementById('cv-contract-content').style.display = 'none';
         document.getElementById('cv-success-msg').style.display = 'block';
       } catch (err) {
         alert("傳送失敗：" + err.message);
-        btn.disabled = false; btn.textContent = "確認簽署並送出合約";
+        btn.disabled = false; btn.textContent = "確認簽署並送出";
       }
     }
 
+    // ==========================================
+    // 管理員端邏輯 (01區)
+    // ==========================================
     function switchTab(tabId) {
       document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -283,62 +275,95 @@
       if(tabId === 'tab2') loadRequirements();
     }
 
-    function addWorkItem(content = '') {
-      const container = document.getElementById('work-items-container');
-      const div = document.createElement('div'); div.className = 'dynamic-item-row';
-      div.innerHTML = `<button type="button" class="btn-danger" style="position:absolute; right:12px; top:12px;" onclick="this.parentElement.remove()">刪除</button><div class="form-group" style="margin-right: 50px; margin-bottom: 0;"><input type="text" class="form-input item-work" value="${escapeHtml(content)}"></div>`;
-      container.appendChild(div);
-    }
-
-    function addFeeItem(content = '') {
-      const container = document.getElementById('fee-items-container');
-      const div = document.createElement('div'); div.className = 'dynamic-item-row';
-      div.innerHTML = `<button type="button" class="btn-danger" style="position:absolute; right:12px; top:12px;" onclick="this.parentElement.remove()">刪除</button><div class="form-group" style="margin-right: 50px; margin-bottom: 0;"><input type="text" class="form-input item-fee" value="${escapeHtml(content)}"></div>`;
-      container.appendChild(div);
-    }
-
     function getCommFormData() {
-      const workItems = []; document.querySelectorAll('.item-work').forEach(i => { if(i.value.trim()) workItems.push(i.value.trim()); });
-      const feeItems = []; document.querySelectorAll('.item-fee').forEach(i => { if(i.value.trim()) feeItems.push(i.value.trim()); });
-      let signDateStr = ""; const rawDate = document.getElementById('comm-sign-date').value;
-      if(rawDate) { const d = new Date(rawDate); signDateStr = `中華民國 ${d.getFullYear() - 1911} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`; }
-
       return {
         reqId: document.getElementById('comm-req-id').value,
         _rowId: document.getElementById('comm-row-id').value,
         companyName: document.getElementById('comm-company').value.trim(),
         rep: document.getElementById('comm-rep').value.trim(),
         address: document.getElementById('comm-address').value.trim(),
-        period: document.getElementById('comm-period').value.trim(),
         phone: document.getElementById('comm-phone').value.trim(),
-        signDate: signDateStr, workItemsJSON: JSON.stringify(workItems), feeItemsJSON: JSON.stringify(feeItems)
+        signDate: document.getElementById('comm-sign-date').value,
+        period: document.getElementById('comm-period').value.trim(),
+        subject: document.getElementById('txt-subject').value.trim(),
+        method: document.getElementById('txt-method').value.trim(),
+        workCustom: document.getElementById('txt-work-custom').value.trim(),
+        workDefault: document.getElementById('txt-work-default').value.trim(),
+        feePrefix: document.getElementById('txt-fee-prefix').value.trim(),
+        feeCustom: document.getElementById('txt-fee-custom').value.trim(),
+        feeSuffix: document.getElementById('txt-fee-suffix').value.trim(),
+        termination: document.getElementById('txt-termination').value.trim(),
+        otherTerms: document.getElementById('txt-other-terms').value.trim()
       };
     }
 
     async function handleSaveDraft() {
       const data = getCommFormData();
-      if (!data.companyName) return alert("請填寫公司名稱");
+      if (!data.companyName) return alert("請填寫客戶名稱");
       const btn = document.getElementById('btn-save-draft'); btn.disabled = true; btn.textContent = "儲存中...";
       try {
         const res = await apiCall('saveDraft', data);
         document.getElementById('comm-row-id').value = res._rowId;
         document.getElementById('comm-req-id').value = res.reqId;
-        alert("✅ 儲存成功！現在可以產生連結給客戶了。");
+        alert("✅ 儲存成功！");
       } catch(err) { alert("儲存失敗：" + err.message); } 
-      finally { btn.disabled = false; btn.textContent = "💾 儲存合約資料"; }
+      finally { btn.disabled = false; btn.textContent = "💾 儲存資料"; }
+    }
+
+    async function handlePreviewPDF() {
+      const data = getCommFormData();
+      if(!data.reqId) return alert("請先點擊『儲存資料』！");
+      const btn = document.getElementById('btn-preview-pdf'); btn.disabled = true; btn.textContent = "產出 PDF 中...";
+      try {
+        const res = await apiCall('generateAndUploadPDF', data);
+        window.open(res.fileUrl, '_blank');
+      } catch(err) { alert("PDF 生成失敗：" + err.message); }
+      finally { btn.disabled = false; btn.textContent = "📄 預覽產生 PDF"; }
+    }
+
+    async function handleSendEmail() {
+      const data = getCommFormData();
+      const emailTo = document.getElementById('email-to').value.trim();
+      if(!data.reqId) return alert("請先儲存資料！");
+      if(!emailTo) return alert("請填寫收件人 Email！");
+      
+      const btn = document.getElementById('btn-send-email'); btn.disabled = true; btn.textContent = "準備寄信中...";
+      
+      try {
+        const fileInput = document.getElementById('email-extra-files');
+        let extraFilesBase64 = [];
+        if (fileInput.files.length > 0) {
+          extraFilesBase64 = await Promise.all(Array.from(fileInput.files).map(async file => {
+            return new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onload = e => resolve({name: file.name, mimeType: file.type, data: e.target.result.split(',')[1]});
+                reader.readAsDataURL(file);
+            });
+          }));
+        }
+        
+        data.emailTo = emailTo;
+        data.extraFiles = extraFilesBase64;
+        
+        await apiCall('sendEmailWithPDF', data);
+        alert("✅ Email 已成功寄出！狀態已更新。");
+        document.getElementById('email-extra-files').value = ""; // clear
+      } catch(err) {
+        alert("寄發失敗：" + err.message);
+      } finally {
+        btn.disabled = false; btn.textContent = "📤 寄發 Email";
+      }
     }
 
     function generateClientLink() {
       const reqId = document.getElementById('comm-req-id').value;
-      if(!reqId) return alert("請先點擊上方『儲存合約資料』，才能產生客戶連結！");
-      
+      if(!reqId) return alert("請先點擊『儲存資料』！");
       if (typeof google !== 'undefined' && google.script) {
         google.script.url.getLocation(function(location) {
            let cleanUrl = location.href.split('?')[0]; 
            let finalLink = `${cleanUrl}?reqId=${reqId}`;
            const aTag = document.getElementById('client-link-href');
-           aTag.href = finalLink;
-           aTag.textContent = finalLink;
+           aTag.href = finalLink; aTag.textContent = finalLink;
            document.getElementById('link-result-container').style.display = 'block';
         });
       }
@@ -360,16 +385,24 @@
       document.getElementById('comm-company').value = item.companyName || '';
       document.getElementById('comm-rep').value = item.customerName || '';
       document.getElementById('comm-address').value = item.address || '';
-      document.getElementById('comm-period').value = item.period || '';
       document.getElementById('comm-phone').value = item.phone || '';
-      document.getElementById('work-items-container').innerHTML = '';
-      document.getElementById('fee-items-container').innerHTML = '';
+      
+      // 解析 JSON 還原 Textarea 內容
       try {
-        JSON.parse(item.workItemsJSON || "[]").forEach(w => addWorkItem(w));
-        JSON.parse(item.feeItemsJSON || "[]").forEach(f => addFeeItem(f));
-      } catch(e) {}
-      if(document.getElementById('work-items-container').children.length === 0) addWorkItem();
-      if(document.getElementById('fee-items-container').children.length === 0) addFeeItem();
+        if(item.contractTextJSON) {
+          const t = JSON.parse(item.contractTextJSON);
+          document.getElementById('txt-subject').value = t.subject || '';
+          document.getElementById('txt-method').value = t.method || '';
+          document.getElementById('txt-work-custom').value = t.workCustom || '';
+          document.getElementById('txt-work-default').value = t.workDefault || '';
+          document.getElementById('txt-fee-prefix').value = t.feePrefix || '';
+          document.getElementById('txt-fee-custom').value = t.feeCustom || '';
+          document.getElementById('txt-fee-suffix').value = t.feeSuffix || '';
+          document.getElementById('txt-termination').value = t.termination || '';
+          document.getElementById('txt-other-terms').value = t.otherTerms || '';
+        }
+      } catch(e) { console.warn("Parse Error:", e); }
+      
       document.getElementById('link-result-container').style.display = 'none';
     }
 
