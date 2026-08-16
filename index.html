@@ -25,7 +25,7 @@
     .btn-primary:disabled, .btn-secondary:disabled { opacity: 0.6; cursor: not-allowed; }
     
     .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #4A5568; }
     .form-input { width: 100%; padding: 10px; border: 1px solid #E2E8F0; border-radius: 6px; font-size: 14px; }
     textarea.form-input { resize: vertical; min-height: 80px; line-height: 1.5; }
     
@@ -44,7 +44,9 @@
 <body>
   <script> const URL_REQ_ID = "<?= clientReqId ?>"; </script>
 
-  <!-- 客戶線上簽署視圖 (純唯讀) -->
+  <!-- ========================================== -->
+  <!-- 客戶線上簽署視圖 (純唯讀 HTML) -->
+  <!-- ========================================== -->
   <div id="client-view">
     <div class="a4-paper">
       <h1 id="cv-title">載入合約中...</h1>
@@ -54,7 +56,7 @@
           <h3 style="margin-top: 0;">✍️ 委任方 (客戶) 線上簽署區</h3>
           <p style="font-size: 13px; color: #718096;">茲同意本函所述各點，請在下方簽名：</p>
           <div class="signature-pad-wrapper">
-            <button onclick="clearClientSignature()" style="position:absolute; top:10px; right:10px;">🗑️ 清除重簽</button>
+            <button onclick="clearClientSignature()" style="position:absolute; top:10px; right:10px; font-size:12px; padding:4px 8px;">🗑️ 清除重簽</button>
             <canvas id="client-signature-pad"></canvas>
           </div>
           <button class="btn-primary" id="btn-client-submit" onclick="submitClientContract()">確認簽署並送出</button>
@@ -66,7 +68,9 @@
     </div>
   </div>
 
-  <!-- 管理員視圖 -->
+  <!-- ========================================== -->
+  <!-- 內部管理員視圖 -->
+  <!-- ========================================== -->
   <div id="admin-view" style="display: none;">
     <nav><h1>智嵂報價特助 (管理後台)</h1></nav>
     <div class="tab-bar">
@@ -82,17 +86,14 @@
           
           <div style="display: flex; gap: 8px;">
             <div class="form-group" style="flex: 1;"><label>客戶名稱</label><input type="text" id="comm-company" class="form-input"></div>
-            <div class="form-group" style="flex: 1;"><label>統一編號</label><input type="text" id="comm-taxid" class="form-input" maxlength="8"></div>
+            <div class="form-group" style="flex: 1;"><label>代表人</label><input type="text" id="comm-rep" class="form-input"></div>
           </div>
           <div style="display: flex; gap: 8px;">
-            <div class="form-group" style="flex: 1;"><label>代表人</label><input type="text" id="comm-rep" class="form-input"></div>
+            <div class="form-group" style="flex: 1;"><label>公司地址</label><input type="text" id="comm-address" class="form-input"></div>
             <div class="form-group" style="flex: 1;"><label>連絡電話</label><input type="text" id="comm-phone" class="form-input"></div>
           </div>
-          <div class="form-group"><label>公司地址</label><input type="text" id="comm-address" class="form-input"></div>
-          <div class="form-group"><label>客戶 Email (寄發報價用)</label><input type="email" id="comm-email" class="form-input"></div>
-          
           <div style="display: flex; gap: 8px;">
-            <div class="form-group" style="flex: 1;"><label>委任期間</label><input type="text" id="comm-period" class="form-input" placeholder="例：自 2026 年 1 月 01 日至 2026 年 12 月 31 日起"></div>
+            <div class="form-group" style="flex: 1;"><label>委任期間</label><input type="text" id="comm-period" class="form-input" placeholder="例：自 115 年 1 月 01 日至以後解除..."></div>
             <div class="form-group" style="flex: 1;"><label>合約簽署日期</label><input type="text" id="comm-sign-date" class="form-input" placeholder="例：中華民國 115 年 08 月 01 日"></div>
           </div>
           
@@ -125,19 +126,53 @@
           </div>
         </div>
 
-        <!-- 寄信區塊 -->
-        <div class="card" style="background-color: #F0F4F8;">
-          <h3 style="margin-top: 0;">📧 寄發 Email (含 PDF 及線上簽署連結)</h3>
+        <!-- 全新擴充：寄發 Email 與 線上簽署區塊 -->
+        <div class="card" style="background-color: #F8FAFC; border-color: #CBD5E0;">
+          <h3 style="margin-top: 0; color: #2b6cb0;">📧 寄發 Email (含 PDF 及線上簽署)</h3>
+          
           <div class="form-group">
-            <label>夾帶額外附件 (可複選)</label>
-            <input type="file" id="email-files" class="form-input" multiple>
-            <p style="font-size: 12px; color: #718096; margin-top: 4px;">系統會自動將產生的「委任書PDF」作為第一份附件夾帶。</p>
+            <label>寄件人</label>
+            <input type="text" class="form-input" value="zhiluchenrenyi@gmail.com (智嵂會計師事務所)" disabled style="background-color: #EDF2F7;">
           </div>
-          <button class="btn-primary" style="background-color: #2b6cb0;" id="btn-email" onclick="handleSendEmail()">📤 寄發 Email</button>
+          <div class="form-group">
+            <label>收件人 Email</label>
+            <input type="email" id="email-to" class="form-input" placeholder="請填寫客戶信箱">
+          </div>
+          <div class="form-group">
+            <label>信件主旨</label>
+            <input type="text" id="email-subject" class="form-input" value="【智嵂會計師事務所】帳務委任書">
+          </div>
+          <div class="form-group">
+            <label>專業信件內容 (可編輯)</label>
+            <textarea id="email-body" class="form-input" rows="5">您好，
+
+附件為貴公司的帳務委任書與相關參考檔案，請查收。
+若確認合約內容無誤，請點擊下方專屬連結進行線上簽署。
+
+謝謝您。
+智嵂會計師事務所 敬上</textarea>
+          </div>
+          <div class="form-group">
+            <label>夾帶檔案 (支援多檔上傳)</label>
+            <input type="file" id="email-files" class="form-input" multiple style="padding: 6px;">
+            <p style="font-size: 12px; color: #718096; margin-top: 4px;">系統會自動將上方產生的「委任書PDF」作為第一份附件夾帶。</p>
+          </div>
+          
+          <div class="action-grid">
+            <button class="btn-primary" style="background-color: #2b6cb0;" id="btn-email" onclick="handleSendEmail()">📤 寄送 Email</button>
+            <button class="btn-secondary" style="color: #2b6cb0; border-color: #2b6cb0;" onclick="generateClientLink()">🔗 產生線上簽署連結</button>
+          </div>
+
+          <div id="link-result-container" style="display:none; margin-top:12px; background:#ebf8ff; padding:12px; border-radius:6px; word-break:break-all;">
+            <p style="font-size:12px; font-weight:bold; color:#2b6cb0; margin:0 0 4px 0;">請複製以下網址傳給客戶：</p>
+            <a id="client-link-href" href="#" target="_blank" style="font-size:13px; color:#3182ce;"></a>
+          </div>
         </div>
       </div>
 
-      <!-- 02 歸檔與追蹤 (不破壞原有結構) -->
+      <!-- ========================================== -->
+      <!-- 02 歸檔與追蹤 -->
+      <!-- ========================================== -->
       <div id="tab2" class="tab-content">
         <div class="card">
           <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -221,19 +256,32 @@
 
     function getFormData() {
       return {
-        reqId: document.getElementById('comm-req-id').value, _rowId: document.getElementById('comm-row-id').value,
+        reqId: document.getElementById('comm-req-id').value, 
+        _rowId: document.getElementById('comm-row-id').value,
         pdfId: document.getElementById('comm-pdf-id').value,
-        companyName: document.getElementById('comm-company').value, taxId: document.getElementById('comm-taxid').value,
-        rep: document.getElementById('comm-rep').value, phone: document.getElementById('comm-phone').value,
-        address: document.getElementById('comm-address').value, email: document.getElementById('comm-email').value,
-        period: document.getElementById('comm-period').value, signDate: document.getElementById('comm-sign-date').value,
-        subject: document.getElementById('txt-subject').value, method: document.getElementById('txt-method').value,
-        workCustom: document.getElementById('txt-work-custom').value, workDefault: document.getElementById('txt-work-default').value,
-        feePrefix: document.getElementById('txt-fee-prefix').value, feeCustom: document.getElementById('txt-fee-custom').value,
-        feeSuffix: document.getElementById('txt-fee-suffix').value, termination: document.getElementById('txt-termination').value,
-        otherTerms: document.getElementById('txt-other-terms').value
+        companyName: document.getElementById('comm-company').value.trim(), 
+        rep: document.getElementById('comm-rep').value.trim(), 
+        phone: document.getElementById('comm-phone').value.trim(),
+        address: document.getElementById('comm-address').value.trim(), 
+        period: document.getElementById('comm-period').value.trim(), 
+        signDate: document.getElementById('comm-sign-date').value.trim(),
+        subject: document.getElementById('txt-subject').value.trim(), 
+        method: document.getElementById('txt-method').value.trim(),
+        workCustom: document.getElementById('txt-work-custom').value.trim(), 
+        workDefault: document.getElementById('txt-work-default').value.trim(),
+        feePrefix: document.getElementById('txt-fee-prefix').value.trim(), 
+        feeCustom: document.getElementById('txt-fee-custom').value.trim(),
+        feeSuffix: document.getElementById('txt-fee-suffix').value.trim(), 
+        termination: document.getElementById('txt-termination').value.trim(),
+        otherTerms: document.getElementById('txt-other-terms').value.trim()
       };
     }
+
+    // 當客戶名稱變更時，自動聯動更新信件主旨
+    document.getElementById('comm-company').addEventListener('input', function(e) {
+      const company = e.target.value.trim() || "客戶";
+      document.getElementById('email-subject').value = `【智嵂會計師事務所】帳務委任書 - ${company}`;
+    });
 
     async function handleSave() {
       const data = getFormData();
@@ -250,22 +298,41 @@
 
     async function handlePreview() {
       const data = getFormData();
-      if(!data.reqId) return alert("請先點擊儲存！");
+      if(!data.reqId) return alert("請先點擊儲存(草稿)！");
       document.getElementById('btn-preview').disabled = true;
+      document.getElementById('btn-preview').textContent = "產生中...";
       try {
         const res = await apiCall('generatePDF', data);
         document.getElementById('comm-pdf-id').value = res.fileId;
         window.open(res.fileUrl, '_blank');
       } catch(e) { alert("PDF 產生失敗：" + e.message); }
-      finally { document.getElementById('btn-preview').disabled = false; }
+      finally { document.getElementById('btn-preview').disabled = false; document.getElementById('btn-preview').innerHTML = "📄 預覽產生 PDF"; }
+    }
+
+    function generateClientLink() {
+      const reqId = document.getElementById('comm-req-id').value;
+      if(!reqId) return alert("請先點擊『儲存(草稿)』！");
+      if (typeof google !== 'undefined' && google.script) {
+        google.script.url.getLocation(function(location) {
+           let cleanUrl = location.href.split('?')[0]; 
+           let finalLink = `${cleanUrl}?reqId=${reqId}`;
+           const aTag = document.getElementById('client-link-href');
+           aTag.href = finalLink; aTag.textContent = finalLink;
+           document.getElementById('link-result-container').style.display = 'block';
+        });
+      }
     }
 
     async function handleSendEmail() {
       const data = getFormData();
       if(!data.pdfId) return alert("請先『預覽產生 PDF』，確保系統已建立文件！");
-      if(!data.email) return alert("請填寫客戶 Email！");
       
-      const btn = document.getElementById('btn-email'); btn.disabled = true; btn.textContent = "寄送中...";
+      const emailTo = document.getElementById('email-to').value.trim();
+      const emailSubject = document.getElementById('email-subject').value.trim();
+      const emailBody = document.getElementById('email-body').value.trim();
+      if(!emailTo) return alert("請填寫收件人 Email！");
+      
+      const btn = document.getElementById('btn-email'); btn.disabled = true; btn.textContent = "信件寄送中...";
       try {
         const files = document.getElementById('email-files').files;
         let extraFiles = [];
@@ -276,11 +343,17 @@
             r.readAsDataURL(f);
           }));
         }
+        
+        // 組合 Email Payload
+        data.emailTo = emailTo;
+        data.emailSubject = emailSubject;
+        data.emailBody = emailBody;
         data.extraFiles = extraFiles;
+        
         await apiCall('sendQuoteEmail', data);
         alert("✅ Email 已成功寄出，狀態更新為「已傳送報價」。");
       } catch(e) { alert("寄信失敗：" + e.message); }
-      finally { btn.disabled = false; btn.textContent = "📤 寄發 Email"; }
+      finally { btn.disabled = false; btn.textContent = "📤 寄送 Email"; }
     }
 
     async function loadRequirements() {
@@ -292,7 +365,7 @@
           <div style="border-bottom:1px solid #eee; padding:10px;">
             <b>${escapeHtml(r.companyName)}</b> <span style="color:#666; font-size:12px;">(${r.status})</span><br>
             單號: ${r.reqId}<br>
-            <a href="#" onclick='loadForm(${JSON.stringify(r).replace(/'/g, "&apos;")})'>✏️ 載入</a>
+            <a href="#" onclick='loadForm(${JSON.stringify(r).replace(/'/g, "&apos;")})'>✏️ 載入修改</a>
           </div>
         `).join('');
       } catch(e) { list.innerHTML = '載入失敗: ' + e.message; }
@@ -303,14 +376,15 @@
       document.getElementById('comm-req-id').value = item.reqId || '';
       document.getElementById('comm-row-id').value = item._rowId || '';
       document.getElementById('comm-company').value = item.companyName || '';
-      document.getElementById('comm-taxid').value = item.taxId || '';
       document.getElementById('comm-rep').value = item.rep || '';
       document.getElementById('comm-phone').value = item.phone || '';
       document.getElementById('comm-address').value = item.address || '';
-      document.getElementById('comm-email').value = item.email || '';
       document.getElementById('comm-period').value = item.period || '';
       document.getElementById('comm-sign-date').value = item.signDate || '';
       document.getElementById('comm-pdf-id').value = item.pdfId || '';
+      
+      // 連動 Email 主旨
+      document.getElementById('email-subject').value = `【智嵂會計師事務所】帳務委任書 - ${item.companyName || "客戶"}`;
       
       try {
         if(item.jsonStr) {
@@ -326,7 +400,10 @@
           document.getElementById('txt-other-terms').value = t.otherTerms || '';
         }
       } catch(e){}
+      
+      document.getElementById('link-result-container').style.display = 'none';
     }
+    
     function escapeHtml(str) { return String(str||'').replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;"); }
   </script>
 </body>
