@@ -6,9 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>智嵂報價特助</title>
   
-  <!-- 引入 html2pdf.js 套件 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
   <style>
     /* 全局樣式設定 */
     * { box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
@@ -22,7 +19,7 @@
     .status-online { background-color: #28a745; }
     .status-offline { background-color: #dc3545; }
 
-    /* 兩大頁籤選單 (Tab Bar) 重構 */
+    /* 兩大頁籤選單 (Tab Bar) */
     .tab-bar { display: flex; border-bottom: 1px solid #E5E5E5; background-color: #FFFFFF; }
     .tab-item { flex: 1; text-align: center; padding: 12px 0; font-size: 14px; font-weight: 600; color: #888888; cursor: pointer; transition: all 0.2s ease; border-bottom: 2px solid transparent; }
     .tab-item.active { color: #111111; border-bottom: 2px solid #111111; }
@@ -48,7 +45,6 @@
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 12px; font-weight: 600; color: #444444; margin-bottom: 4px; }
     .form-input { width: 100%; padding: 8px 10px; border: 1px solid #E5E5E5; border-radius: 4px; font-size: 14px; background-color: #FFFFFF; }
-    textarea.form-input { resize: vertical; min-height: 80px; }
     
     /* 標籤與時間軸 */
     .tag-item { background-color: #111111; color: #FFFFFF; font-size: 12px; font-weight: 500; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-right: 6px; margin-bottom: 4px; }
@@ -76,15 +72,10 @@
     .signature-pad-container { border: 1px solid #E5E5E5; border-radius: 4px; background-color: #FFFFFF; overflow: hidden; touch-action: none; position: relative; }
     #signature-pad { width: 100%; height: 200px; display: block; cursor: crosshair; }
 
-    /* AI 退件警告與歷史彈窗 Modal */
+    /* Modal 彈窗 */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center; }
     .modal-box { background: #FFFFFF; padding: 24px; border-radius: 8px; width: 90%; max-width: 400px; max-height: 85vh; overflow-y: auto; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-    .modal-box-reject { border-top: 4px solid #EF4444; }
     .modal-box-history { border-top: 4px solid #111111; text-align: left; }
-
-    /* A4 預覽區塊 (直接顯示於底部) */
-    .a4-container-wrapper { overflow-x: auto; background: #E5E5E5; padding: 20px; border-radius: 8px; margin-top: 16px; }
-    .a4-container { background: #fff; width: 210mm; min-height: 297mm; padding: 25mm 20mm; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 0 auto; text-align: left; color: #000; line-height: 1.8; font-size: 15px; }
 
     .archive-header-row { display: flex; gap: 8px; margin-bottom: 16px; }
     .badge-success { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; font-size: 11px; padding: 2px 6px; border-radius: 12px; font-weight: 600; }
@@ -92,7 +83,6 @@
     .badge-draft { background-color: #e2e8f0; color: #334155; border: 1px solid #cbd5e1; font-size: 11px; padding: 2px 6px; border-radius: 12px; font-weight: 600; }
 
     .history-log-item { padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
-    .history-log-item:last-child { border-bottom: none; }
     .history-time { font-size: 11px; color: #64748b; }
     .history-module { font-weight: 600; color: #0f172a; margin-right: 4px; }
     .history-action { color: #334155; }
@@ -101,15 +91,6 @@
   </style>
 </head>
 <body>
-
-  <!-- AI 退件專屬 Modal -->
-  <div id="ai-reject-modal" class="modal-overlay">
-    <div class="modal-box modal-box-reject">
-      <h3 style="color:#EF4444; margin-top:0; font-size:18px;">⚠️ 簽名品質未達標</h3>
-      <p id="ai-reject-msg" style="font-size:14px; color:#444444; margin-bottom:20px; line-height:1.5;"></p>
-      <button class="btn-primary" style="background-color:#EF4444; width:100%; height:42px; font-size:14px;" onclick="closeAiModal()">確認並重新簽名</button>
-    </div>
-  </div>
 
   <!-- 電子簽名板專屬 Modal -->
   <div id="signature-modal" class="modal-overlay">
@@ -161,7 +142,7 @@
       
       <!-- 📄 委任書建檔區塊 (全面改版對齊新範本) -->
       <div class="card" id="commission-doc-section">
-        <h3 style="margin-top: 0; font-size: 16px; font-weight: 700; margin-bottom: 12px;">📄 代理帳務委任書建檔</h3>
+        <h3 style="margin-top: 0; font-size: 16px; font-weight: 700; margin-bottom: 12px;">📄 代理帳務委任書建檔 (新版)</h3>
         <input type="hidden" id="comm-req-id">
         <input type="hidden" id="comm-row-id">
         
@@ -220,13 +201,13 @@
         </div>
 
         <div style="margin-top: 20px;">
-          <button class="btn-secondary" style="width:100%; height: 48px; font-size: 14px; font-weight:bold;" id="btn-save-draft" onclick="handleSaveDraft()">💾 儲存資料</button>
+          <button class="btn-secondary" style="width:100%; height: 48px; font-size: 14px; font-weight:bold;" id="btn-save-draft" onclick="handleSaveDraft()">💾 儲存草稿資料</button>
         </div>
       </div>
 
-      <!-- 現場線上簽署區 -->
+      <!-- 現場線上簽署與預覽區 -->
       <div class="card">
-        <h3 style="margin-top: 0;">✍️ 線上簽署與雲端建檔區</h3>
+        <h3 style="margin-top: 0;">✍️ 線上簽署與預覽區</h3>
         <div class="form-group" style="margin-top: 16px;">
           <button class="btn-secondary" style="width:100%; height:48px; border:2px dashed #111; font-weight:bold;" onclick="openSignatureModal()">✍️ 點擊開啟簽名板</button>
           <div id="signature-preview-container" style="display:none; margin-top:12px; text-align:center;">
@@ -235,16 +216,20 @@
           </div>
         </div>
         <div style="margin-top: 16px;">
-          <button class="btn-primary" style="width:100%; background-color:#28a745; height: 48px; font-size: 14px;" id="btn-upload-pdf" onclick="uploadA4PDFToDrive()">📥 產生 PDF 委任書並建檔至雲端硬碟</button>
-          <div id="pdf-link-container" style="margin-top: 12px; text-align: center;"></div>
+          <button class="btn-primary" style="width:100%; background-color:#2563eb; height: 48px; font-size: 14px;" id="btn-preview-pdf" onclick="generatePdfPreview()">🔍 預覽並產生 PDF (Google Doc 標籤替換)</button>
+        </div>
+
+        <!-- 產出後的 PDF 顯示區塊 -->
+        <div id="pdf-preview-area" style="display:none; margin-top: 16px; border-top: 1px dashed #ccc; padding-top: 16px;">
+          <p style="font-size: 13px; color: #28a745; font-weight: bold; text-align: center;">✅ PDF 產生成功！</p>
+          <div id="pdf-link-container" style="text-align: center; margin-bottom: 12px;"></div>
+          <iframe id="pdf-preview-iframe" src="" style="width: 100%; height: 500px; border: 1px solid #ccc; border-radius: 4px;"></iframe>
         </div>
       </div>
-
     </div>
 
     <!-- ==================== 02 歸檔與追蹤 ==================== -->
     <div id="tab2" class="tab-content">
-      <!-- 內容保持不變，避免破壞既有功能 -->
       <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <h3 style="margin: 0; font-size: 16px; font-weight: 700;">需求與建檔時間軸 (Timeline)</h3>
@@ -255,6 +240,7 @@
         </div>
         <div class="pagination-controls" id="timeline-pagination"></div>
       </div>
+      
       <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <h3 style="margin: 0; font-size: 16px;">📁 雲端歸檔與通知追蹤</h3>
@@ -276,6 +262,7 @@
   </div>
 
   <script>
+    // ⚠️ 部署後請更新此網址
     const GAS_WEB_URL = "https://script.google.com/macros/s/AKfycbxKDzJ6CViZhgm75MLXmK9jO_ZM1Smo8Esy3wuj1JfD7PccBj4eNKp3TsLwKElRWmDb/exec";
 
     let globalRequirements = [];
@@ -291,10 +278,9 @@
     }
 
     function updateNetworkStatus() {
-      const isOnline = navigator.onLine;
       const dot = document.getElementById('network-dot');
       const text = document.getElementById('network-text');
-      if (isOnline) { dot.className = 'status-dot status-online'; text.textContent = 'Online'; text.style.color = '#111111'; } 
+      if (navigator.onLine) { dot.className = 'status-dot status-online'; text.textContent = 'Online'; text.style.color = '#111111'; } 
       else { dot.className = 'status-dot status-offline'; text.textContent = 'Offline'; text.style.color = '#dc3545'; }
     }
     window.addEventListener('online', updateNetworkStatus);
@@ -316,10 +302,10 @@
         }
         if (res.status !== "success") throw new Error(res.message || "伺服器處理失敗");
         return res.data; 
-      } catch (error) { console.error(`[API 錯誤] ${action} 失敗:`, error); throw error; }
+      } catch (error) { throw error; }
     }
 
-    // --- 動態列表邏輯 ---
+    // --- 01區: 動態表單實作 (無上限) ---
     function addWorkItem(content = '') {
       const container = document.getElementById('work-items-container');
       const div = document.createElement('div');
@@ -349,29 +335,24 @@
       document.getElementById('fee-items-container').innerHTML = '';
     }
 
-    // --- 表單資料封裝 ---
+    // --- 01區: 表單資料擷取與 JSON 打包 ---
     function getCommFormData() {
-      // 1. 抓取工作內容陣列
       const workItems = [];
       document.querySelectorAll('.item-work').forEach(input => {
         if(input.value.trim()) workItems.push(input.value.trim());
       });
 
-      // 2. 抓取酬金陣列
       const feeItems = [];
       document.querySelectorAll('.item-fee').forEach(input => {
         if(input.value.trim()) feeItems.push(input.value.trim());
       });
 
-      // 3. 處理簽約日期 (轉為民國格式)
+      // 處理簽約日期，轉換為民國格式
       let signDateStr = "";
       const rawDate = document.getElementById('comm-sign-date').value;
       if(rawDate) {
         const d = new Date(rawDate);
         signDateStr = `中華民國 ${d.getFullYear() - 1911} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`;
-      } else {
-        const today = new Date();
-        signDateStr = `中華民國 ${today.getFullYear() - 1911} 年 ${today.getMonth() + 1} 月 ${today.getDate()} 日`;
       }
 
       return {
@@ -382,15 +363,15 @@
         address: document.getElementById('comm-address').value.trim(),
         period: document.getElementById('comm-period').value.trim(),
         phone: document.getElementById('comm-phone').value.trim(),
-        signDate: signDateStr,
-        workItemsJSON: JSON.stringify(workItems), // 打包為 JSON 字串
-        feeItemsJSON: JSON.stringify(feeItems)    // 打包為 JSON 字串
+        signDate: signDateStr, // 轉換後的民國日期
+        workItemsJSON: JSON.stringify(workItems), // 打包成 JSON 字串
+        feeItemsJSON: JSON.stringify(feeItems)    // 打包成 JSON 字串
       };
     }
 
     async function handleSaveDraft() {
       const data = getCommFormData();
-      if (!data.companyName || !data.rep) return alert("請填寫「公司名稱」與「代表人」。");
+      if (!data.companyName) return alert("請至少填寫公司名稱。");
       const btn = document.getElementById('btn-save-draft');
       btn.disabled = true; btn.textContent = "儲存中...";
       try {
@@ -399,57 +380,57 @@
         document.getElementById('comm-req-id').value = res.reqId;
         alert("✅ 資料儲存成功！");
       } catch(err) { alert("儲存失敗：" + err.message); } 
-      finally { btn.disabled = false; btn.textContent = "💾 儲存資料"; }
+      finally { btn.disabled = false; btn.textContent = "💾 儲存草稿資料"; }
     }
 
-    async function uploadA4PDFToDrive() {
+    async function generatePdfPreview() {
       const data = getCommFormData();
-      if (!data.companyName || !data.rep) return alert("請先填寫完整委任書基本欄位！");
+      if (!data.companyName || !data.rep) return alert("請先填寫公司名稱與代表人以產生 PDF。");
       
-      const btn = document.getElementById('btn-upload-pdf');
-      btn.disabled = true; btn.textContent = "呼叫後端產生 PDF 並建檔中...";
+      const btn = document.getElementById('btn-preview-pdf');
+      btn.disabled = true; btn.textContent = "呼叫後端產生 PDF 中...";
 
       try {
-        // 先同步儲存資料
+        // 同步儲存至 Sheet
         const res = await apiCall('saveDraft', data);
         document.getElementById('comm-row-id').value = res._rowId;
         document.getElementById('comm-req-id').value = res.reqId;
         
-        // 抓取簽名檔 Base64 (若有)
+        // 如果有簽名圖片，帶入資料中
         const previewImg = document.getElementById('signature-preview-img');
         if (previewImg.src && previewImg.src.indexOf('data:image') !== -1) {
           data.signatureDataUri = previewImg.src;
         }
 
-        // 呼叫後端 Google Doc 替換引擎產生 PDF
+        // 呼叫後端取代標籤並產出 PDF
         const uploadRes = await apiCall('generateAndUploadPDF', data);
-        alert(`✅ 委任書 PDF 已成功產生並建檔於雲端硬碟！\n連結：${uploadRes.fileUrl}`);
-        document.getElementById('pdf-link-container').innerHTML = `<a href="${uploadRes.fileUrl}" target="_blank" style="color:#2563eb; font-weight:bold; font-size:14px; text-decoration:underline;">🔗 點此觀看已建檔 PDF</a>`;
+        
+        // 顯示預覽區塊
+        document.getElementById('pdf-link-container').innerHTML = `<a href="${uploadRes.fileUrl}" target="_blank" style="color:#2563eb; font-weight:bold; font-size:14px; text-decoration:underline;">🔗 點此於新分頁開啟 PDF</a>`;
+        document.getElementById('pdf-preview-iframe').src = uploadRes.fileUrl.replace('/view', '/preview');
+        document.getElementById('pdf-preview-area').style.display = 'block';
+
       } catch (err) {
-        alert(`建檔失敗：${err.message}`);
+        alert(`產生 PDF 失敗：${err.message}`);
       } finally {
-        btn.disabled = false; btn.textContent = "📥 產生 PDF 委任書並建檔至雲端硬碟";
+        btn.disabled = false; btn.textContent = "🔍 預覽並產生 PDF (Google Doc 標籤替換)";
       }
     }
 
-    // 02區 Timeline 與帶回邏輯
+    // --- 02區: Timeline 帶回修改 ---
     async function loadRequirements() {
       const timelineEl = document.getElementById('timeline-list');
       timelineEl.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">載入中...</div>';
-      try {
-        globalRequirements = await apiCall('getRequirements', {});
-        renderTimelinePage(1);
-      } catch (err) { timelineEl.innerHTML = '<div style="text-align: center; color: #dc3545;">資料載入失敗。</div>'; }
+      try { globalRequirements = await apiCall('getRequirements', {}); renderTimelinePage(1); } 
+      catch (err) { timelineEl.innerHTML = '<div style="text-align: center; color: #dc3545;">資料載入失敗。</div>'; }
     }
 
     function renderTimelinePage(page) {
       currentReqPage = page;
       const timelineEl = document.getElementById('timeline-list');
       const pageCtrl = document.getElementById('timeline-pagination');
-      
       if (!globalRequirements || globalRequirements.length === 0) {
-        timelineEl.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">尚無需求紀錄。</div>'; 
-        pageCtrl.innerHTML = ''; return;
+        timelineEl.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">尚無需求紀錄。</div>'; pageCtrl.innerHTML = ''; return;
       }
       const totalPages = Math.ceil(globalRequirements.length / REQ_ITEMS_PER_PAGE);
       if (currentReqPage > totalPages) currentReqPage = totalPages;
@@ -465,14 +446,8 @@
             <div class="timeline-dot"></div>
             <div class="timeline-card">
               <div class="timeline-header" style="display:flex; justify-content:space-between;">
-                <div>
-                  <div class="timeline-title">${escapeHtml(item.customerName || '未提供')}</div>
-                  <div class="timeline-company">${escapeHtml(item.companyName || '未提供')}</div>
-                </div>
-                <div style="text-align:right;">
-                  <div class="timeline-time">${escapeHtml(item.timeStr || '')}</div>
-                  <div style="margin-top:4px;">${statusBadge}</div>
-                </div>
+                <div><div class="timeline-title">${escapeHtml(item.customerName || '未提供')}</div><div class="timeline-company">${escapeHtml(item.companyName || '未提供')}</div></div>
+                <div style="text-align:right;"><div class="timeline-time">${escapeHtml(item.timeStr || '')}</div><div style="margin-top:4px;">${statusBadge}</div></div>
               </div>
               <div class="timeline-footer" style="border-top:1px solid #E5E5E5; padding-top:8px; margin-top:8px;">
                 <button class="btn-import-draft" onclick='reverseEditForm(${JSON.stringify(item).replace(/'/g, "&apos;")})'>✏️ 帶入 01 區修改</button>
@@ -481,11 +456,7 @@
           </div>`;
       });
       timelineEl.innerHTML = html;
-      pageCtrl.innerHTML = `
-        <button class="btn-secondary" ${currentReqPage === 1 ? 'disabled' : ''} onclick="renderTimelinePage(${currentReqPage - 1})">上一頁</button>
-        <span>第 ${currentReqPage} / ${totalPages} 頁</span>
-        <button class="btn-secondary" ${currentReqPage === totalPages ? 'disabled' : ''} onclick="renderTimelinePage(${currentReqPage + 1})">下一頁</button>
-      `;
+      pageCtrl.innerHTML = `<button class="btn-secondary" ${currentReqPage === 1 ? 'disabled' : ''} onclick="renderTimelinePage(${currentReqPage - 1})">上一頁</button><span>第 ${currentReqPage} / ${totalPages} 頁</span><button class="btn-secondary" ${currentReqPage === totalPages ? 'disabled' : ''} onclick="renderTimelinePage(${currentReqPage + 1})">下一頁</button>`;
     }
 
     function reverseEditForm(item) {
@@ -501,34 +472,25 @@
       document.getElementById('comm-phone').value = item.phone || '';
 
       clearDynamicItems();
-      // 解析後端傳來的 JSON 字串並自動生成對應的欄位
       try {
         const works = JSON.parse(item.workItemsJSON || "[]");
         works.forEach(w => addWorkItem(w));
         const fees = JSON.parse(item.feeItemsJSON || "[]");
         fees.forEach(f => addFeeItem(f));
-      } catch(e) { console.error("JSON 解析錯誤"); }
+      } catch(e) {}
       
       if(document.getElementById('work-items-container').children.length === 0) addWorkItem();
       if(document.getElementById('fee-items-container').children.length === 0) addFeeItem();
+      document.getElementById('pdf-preview-area').style.display = 'none';
     }
 
-    // --- 畫布邏輯 ---
+    // --- 畫布邏輯 (維持不變) ---
     let canvas, ctx, isDrawing = false;
     function openSignatureModal() { document.getElementById('signature-modal').style.display = 'flex'; setTimeout(() => { if (!canvas) initCanvas(); resizeCanvas(); }, 100); }
     function closeSignatureModal() { document.getElementById('signature-modal').style.display = 'none'; }
-    function initCanvas() {
-      canvas = document.getElementById('signature-pad'); if (!canvas) return;
-      ctx = canvas.getContext('2d'); window.addEventListener('resize', resizeCanvas);
-      canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mousemove', draw); canvas.addEventListener('mouseup', stopDrawing); canvas.addEventListener('mouseout', stopDrawing);
-      canvas.addEventListener('touchstart', startDrawing, {passive: false}); canvas.addEventListener('touchmove', draw, {passive: false}); canvas.addEventListener('touchend', stopDrawing, {passive: false});
-    }
+    function initCanvas() { canvas = document.getElementById('signature-pad'); if (!canvas) return; ctx = canvas.getContext('2d'); window.addEventListener('resize', resizeCanvas); canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mousemove', draw); canvas.addEventListener('mouseup', stopDrawing); canvas.addEventListener('mouseout', stopDrawing); canvas.addEventListener('touchstart', startDrawing, {passive: false}); canvas.addEventListener('touchmove', draw, {passive: false}); canvas.addEventListener('touchend', stopDrawing, {passive: false}); }
     function resizeCanvas() { if(!canvas || canvas.offsetWidth === 0) return; const rect = canvas.parentElement.getBoundingClientRect(); canvas.width = rect.width; canvas.height = 200; ctx.lineWidth = 3; ctx.lineCap = "round"; ctx.strokeStyle = "#111111"; }
-    function getPointerPos(e) {
-      const rect = canvas.getBoundingClientRect(); let clientX = e.clientX; let clientY = e.clientY;
-      if (e.touches && e.touches.length > 0) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
-      return { x: clientX - rect.left, y: clientY - rect.top };
-    }
+    function getPointerPos(e) { const rect = canvas.getBoundingClientRect(); let clientX = e.clientX; let clientY = e.clientY; if (e.touches && e.touches.length > 0) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; } return { x: clientX - rect.left, y: clientY - rect.top }; }
     function startDrawing(e) { e.preventDefault(); isDrawing = true; const pos = getPointerPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
     function draw(e) { if (!isDrawing) return; e.preventDefault(); const pos = getPointerPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); }
     function stopDrawing(e) { if (!isDrawing) return; e.preventDefault(); isDrawing = false; }
@@ -540,10 +502,8 @@
       document.getElementById('signature-preview-container').style.display = 'block';
       closeSignatureModal();
     }
-
     function escapeHtml(str) { if (!str) return ''; return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
 
-    // 初始化時加載一筆空資料
     window.addEventListener('DOMContentLoaded', () => {
       updateNetworkStatus();
       addWorkItem();
